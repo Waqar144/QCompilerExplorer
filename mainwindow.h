@@ -17,8 +17,13 @@ public:
 
 private slots:
     void setupLanguages(const QByteArray& data);
+    void updateCompilerComboBox(const QByteArray& data);
 
     /* Private Functions */
+    void on_languagesComboBox_currentIndexChanged(const QString& arg1);
+
+    void on_compileButton_clicked();
+
 private:
     void initConnections();
     /* Private Member Variables*/
