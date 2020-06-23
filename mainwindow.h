@@ -15,6 +15,13 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void setupLanguages(const QByteArray& data);
+
+    /* Private Functions */
+private:
+    void initConnections();
+    /* Private Member Variables*/
 private:
     Ui::MainWindow *ui;
 };

@@ -9,14 +9,17 @@ class GodboltSvc : public QObject
 {
     Q_OBJECT
 public:
-    static GodboltSvc* instance(QObject* parent = nullptr);
+    static GodboltSvc* instance();
     void sendRequest(QGodBolt::Endpoints endpoint);
 
 private slots:
     void slotNetworkReply(QNetworkReply* reply);
 
+signals:
+    void languages(const QByteArray& data);
+
 private:
-    GodboltSvc(QObject* parent);
+    GodboltSvc(QObject* parent = nullptr);
     QNetworkAccessManager* mgr;
 };
 

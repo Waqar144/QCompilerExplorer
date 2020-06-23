@@ -4,9 +4,9 @@
 
 static QString url = QStringLiteral("https://godbolt.org/api/");
 
-GodboltSvc* GodboltSvc::instance(QObject* parent)
+GodboltSvc* GodboltSvc::instance()
 {
-    static GodboltSvc s_instance(parent);
+    static GodboltSvc s_instance;
     return &s_instance;
 }
 
@@ -19,8 +19,6 @@ void GodboltSvc::sendRequest(QGodBolt::Endpoints endpoint)
     req.setRawHeader("ACCEPT", "application/json");
     req.setRawHeader("Content-Type", "application/josn");
 
-    qDebug() << req.rawHeaderList();
-    //    qDebug() << req.url().toString();
     mgr->get(req);
 }
 
@@ -33,5 +31,16 @@ GodboltSvc::GodboltSvc(QObject* parent)
 
 void GodboltSvc::slotNetworkReply(QNetworkReply* reply)
 {
-    qDebug() << reply->readAll();
+    const QString path = reply->url().path().split('/').at(2);
+    QGodBolt::Endpoints endpoint = QGodBolt::stringToEndpoint.value(path);
+
+    switch (endpoint) {
+    case QGodBolt::Languages: {
+        QByteArray data = reply->readAll();
+        emit languages(data);
+        break;
+    }
+    case QGodBolt::Compilers:
+        break;
+    }
 }
