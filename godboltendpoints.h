@@ -15,6 +15,10 @@ static const QHash<Endpoints, QString> endpointsToString = {
     { Endpoints::Compilers, "compilers" }
 };
 
+static const QHash<QString, Endpoints> stringToEndpoint = {
+    { "languages", Endpoints::Languages },
+    { "compilers", Endpoints::Compilers }
+};
 }
 
 #endif // GODBOLTENDPOINTS_H
