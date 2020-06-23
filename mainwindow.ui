@@ -24,10 +24,17 @@
           <item>
            <widget class="QComboBox" name="languagesComboBox"/>
           </item>
+          <item>
+           <widget class="QPushButton" name="compileButton">
+            <property name="text">
+             <string>Compile</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
-         <widget class="QPlainTextEdit" name="plainTextEdit"/>
+         <widget class="QPlainTextEdit" name="codeTextEdit"/>
         </item>
        </layout>
       </item>
@@ -36,7 +43,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QComboBox" name="comboBox_2"/>
+           <widget class="QComboBox" name="compilerComboBox"/>
           </item>
           <item>
            <widget class="QLineEdit" name="lineEdit"/>
@@ -51,7 +58,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QPlainTextEdit" name="plainTextEdit_2"/>
+         <widget class="QPlainTextEdit" name="asmTextEdit"/>
         </item>
        </layout>
       </item>
