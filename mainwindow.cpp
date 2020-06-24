@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->asmTextEdit->setReadOnly(true);
 
     initConnections();
+    setupCodeEditor();
 
     CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
 }
@@ -60,6 +61,14 @@ void MainWindow::initConnections()
     connect(CompileSvc::instance(), &CompileSvc::languages, this, &MainWindow::setupLanguages);
     connect(CompileSvc::instance(), &CompileSvc::compilers, this, &MainWindow::updateCompilerComboBox);
     connect(CompileSvc::instance(), &CompileSvc::asmResult, this, &MainWindow::updateAsmTextEdit);
+}
+
+void MainWindow::setupCodeEditor()
+{
+    auto font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    font.setPixelSize(12);
+    ui->codeTextEdit->setFont(font);
+    ui->codeTextEdit->setTabStopDistance(4 * QFontMetrics(font).horizontalAdvance(' '));
 }
 
 QJsonDocument MainWindow::getCompilationOptions(const QString& source, const QString& userArgs) const

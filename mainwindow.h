@@ -26,6 +26,7 @@ private slots:
     /* Private Functions */
 private:
     void initConnections();
+    void setupCodeEditor();
     QJsonDocument getCompilationOptions(const QString &source, const QString &userArgs) const;
     /* Private Member Variables*/
 private:
