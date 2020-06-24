@@ -31,6 +31,11 @@ void CompileSvc::compileRequest(const QString& endpoint, const QByteArray& obj)
     mgr->post(req, obj);
 }
 
+CompileSvc::~CompileSvc()
+{
+    delete mgr;
+}
+
 CompileSvc::CompileSvc(QObject* parent)
     : QObject(parent)
 {

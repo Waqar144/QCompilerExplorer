@@ -13,6 +13,8 @@ public:
     void sendRequest(QGodBolt::Endpoints endpoint, const QString& additional = QString());
     void compileRequest(const QString& endpoint, const QByteArray& obj);
 
+    ~CompileSvc();
+
 private slots:
     void slotNetworkReply(QNetworkReply* reply);
 
