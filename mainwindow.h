@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include "QSourceHighlite/qsourcehighliter.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -26,10 +28,13 @@ private slots:
     /* Private Functions */
 private:
     void initConnections();
+    void initCodeLangs();
     void setupCodeEditor();
     QJsonDocument getCompilationOptions(const QString &source, const QString &userArgs) const;
     /* Private Member Variables*/
 private:
+    QSourceHighlite::QSourceHighliter* highlighter;
+    static QHash<QString, QSourceHighlite::QSourceHighliter::Language> _langStringToEnum;
     Ui::MainWindow *ui;
 };
 #endif // MAINWINDOW_H

@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+QHash<QString, QSourceHighlite::QSourceHighliter::Language> MainWindow::_langStringToEnum;
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -18,12 +20,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     initConnections();
     setupCodeEditor();
+    initCodeLangs();
 
     CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
 }
 
 MainWindow::~MainWindow()
 {
+    delete highlighter;
     delete ui;
 }
 
@@ -63,12 +67,34 @@ void MainWindow::initConnections()
     connect(CompileSvc::instance(), &CompileSvc::asmResult, this, &MainWindow::updateAsmTextEdit);
 }
 
+void MainWindow::initCodeLangs()
+{
+    using namespace QSourceHighlite;
+    MainWindow::_langStringToEnum = QHash<QString, QSourceHighliter::Language> {
+        { QLatin1String("c"), QSourceHighliter::Language::CodeC },
+        { QLatin1String("cpp"), QSourceHighliter::Language::CodeCpp },
+        { QLatin1String("cxx"), QSourceHighliter::Language::CodeCpp },
+        { QLatin1String("c++"), QSourceHighliter::Language::CodeCpp },
+        { QLatin1String("go"), QSourceHighliter::Language::CodeGo },
+        { QLatin1String("py"), QSourceHighliter::Language::CodePython },
+        { QLatin1String("python"), QSourceHighliter::Language::CodePython },
+        { QLatin1String("rust"), QSourceHighliter::Language::CodeRust },
+    };
+}
+
 void MainWindow::setupCodeEditor()
 {
     auto font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     font.setPixelSize(12);
     ui->codeTextEdit->setFont(font);
     ui->codeTextEdit->setTabStopDistance(4 * QFontMetrics(font).horizontalAdvance(' '));
+
+    //set background
+    ui->codeTextEdit->setStyleSheet("background-color: #272822;");
+
+    auto doc = ui->codeTextEdit->document();
+    highlighter = new QSourceHighlite::QSourceHighliter(doc);
+    highlighter->setTheme(QSourceHighlite::QSourceHighliter::Themes::Monokai);
 }
 
 QJsonDocument MainWindow::getCompilationOptions(const QString& source, const QString& userArgs) const
@@ -110,8 +136,12 @@ QJsonDocument MainWindow::getCompilationOptions(const QString& source, const QSt
 void MainWindow::on_languagesComboBox_currentIndexChanged(const QString& arg1)
 {
     Q_UNUSED(arg1)
-    const QString languageId = '/' + ui->languagesComboBox->currentData().toString();
+    const QString language = ui->languagesComboBox->currentData().toString();
+    const QString languageId = '/' + language;
     CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Compilers, languageId);
+    highlighter->setCurrentLanguage(_langStringToEnum.value(language));
+    qDebug() << highlighter->currentLanguage();
+    qDebug() << language << " " << _langStringToEnum.value(language);
     ui->compilerComboBox->clear();
 }
 
