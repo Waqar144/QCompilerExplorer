@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     initConnections();
 
-    GodboltSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
+    CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
 }
 
 MainWindow::~MainWindow()
@@ -57,9 +57,9 @@ void MainWindow::updateAsmTextEdit(const QByteArray& data)
 
 void MainWindow::initConnections()
 {
-    connect(GodboltSvc::instance(), &GodboltSvc::languages, this, &MainWindow::setupLanguages);
-    connect(GodboltSvc::instance(), &GodboltSvc::compilers, this, &MainWindow::updateCompilerComboBox);
-    connect(GodboltSvc::instance(), &GodboltSvc::asmResult, this, &MainWindow::updateAsmTextEdit);
+    connect(CompileSvc::instance(), &CompileSvc::languages, this, &MainWindow::setupLanguages);
+    connect(CompileSvc::instance(), &CompileSvc::compilers, this, &MainWindow::updateCompilerComboBox);
+    connect(CompileSvc::instance(), &CompileSvc::asmResult, this, &MainWindow::updateAsmTextEdit);
 }
 
 QJsonDocument MainWindow::getCompilationOptions(const QString& source, const QString& userArgs) const
@@ -102,7 +102,7 @@ void MainWindow::on_languagesComboBox_currentIndexChanged(const QString& arg1)
 {
     Q_UNUSED(arg1)
     const QString languageId = '/' + ui->languagesComboBox->currentData().toString();
-    GodboltSvc::instance()->sendRequest(QGodBolt::Endpoints::Compilers, languageId);
+    CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Compilers, languageId);
     ui->compilerComboBox->clear();
 }
 
@@ -118,5 +118,5 @@ void MainWindow::on_compileButton_clicked()
 
     QString endpoint = "compiler/" + ui->compilerComboBox->currentData().toString() + "/compile";
     //    QString endpoint = "compiler/" + QString("g63") + "/compile";
-    GodboltSvc::instance()->compileRequest(endpoint, data.toJson());
+    CompileSvc::instance()->compileRequest(endpoint, data.toJson());
 }

@@ -5,11 +5,11 @@
 #include <QObject>
 #include <QtNetwork/QNetworkAccessManager>
 
-class GodboltSvc : public QObject
+class CompileSvc : public QObject
 {
     Q_OBJECT
 public:
-    static GodboltSvc* instance();
+    static CompileSvc* instance();
     void sendRequest(QGodBolt::Endpoints endpoint, const QString& additional = QString());
     void compileRequest(const QString& endpoint, const QByteArray& obj);
 
@@ -22,7 +22,7 @@ signals:
     void asmResult(const QByteArray& data);
 
 private:
-    GodboltSvc(QObject* parent = nullptr);
+    CompileSvc(QObject* parent = nullptr);
     QNetworkAccessManager* mgr;
 };
 

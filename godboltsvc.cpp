@@ -4,13 +4,13 @@
 
 static QString url = QStringLiteral("https://godbolt.org/api/");
 
-GodboltSvc* GodboltSvc::instance()
+CompileSvc* CompileSvc::instance()
 {
-    static GodboltSvc s_instance;
+    static CompileSvc s_instance;
     return &s_instance;
 }
 
-void GodboltSvc::sendRequest(QGodBolt::Endpoints endpoint, const QString& additional)
+void CompileSvc::sendRequest(QGodBolt::Endpoints endpoint, const QString& additional)
 {
     QString endp = QGodBolt::endpointsToString.value(endpoint);
     QString requestUrl = url + endp + additional;
@@ -22,7 +22,7 @@ void GodboltSvc::sendRequest(QGodBolt::Endpoints endpoint, const QString& additi
     mgr->get(req);
 }
 
-void GodboltSvc::compileRequest(const QString& endpoint, const QByteArray& obj)
+void CompileSvc::compileRequest(const QString& endpoint, const QByteArray& obj)
 {
     QString requestUrl = url + endpoint;
     qDebug() << "Compile Url: " << requestUrl;
@@ -33,14 +33,14 @@ void GodboltSvc::compileRequest(const QString& endpoint, const QByteArray& obj)
     mgr->post(req, obj);
 }
 
-GodboltSvc::GodboltSvc(QObject* parent)
+CompileSvc::CompileSvc(QObject* parent)
     : QObject(parent)
 {
     mgr = new QNetworkAccessManager(this);
-    connect(mgr, &QNetworkAccessManager::finished, this, &GodboltSvc::slotNetworkReply);
+    connect(mgr, &QNetworkAccessManager::finished, this, &CompileSvc::slotNetworkReply);
 }
 
-void GodboltSvc::slotNetworkReply(QNetworkReply* reply)
+void CompileSvc::slotNetworkReply(QNetworkReply* reply)
 {
     const QString path = reply->url().path().split('/').at(2);
     qDebug() << path;
