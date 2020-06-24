@@ -61,11 +61,11 @@ void MainWindow::initConnections()
     connect(GodboltSvc::instance(), &GodboltSvc::asmResult, this, &MainWindow::updateAsmTextEdit);
 }
 
-QJsonDocument MainWindow::getCompilationOptions(const QString& source) const
+QJsonDocument MainWindow::getCompilationOptions(const QString& source, const QString& userArgs) const
 {
     //opt obj
     QJsonObject optObj;
-    optObj["userArguments"] = "-O3";
+    optObj["userArguments"] = userArgs;
 
     //compiler options obj
     QJsonObject compilerObj;
@@ -110,7 +110,8 @@ void MainWindow::on_compileButton_clicked()
     if (ui->codeTextEdit->toPlainText().isEmpty())
         return;
     const QString text = ui->codeTextEdit->toPlainText();
-    auto data = getCompilationOptions(text);
+    const QString args = ui->argsLineEdit->text();
+    auto data = getCompilationOptions(text, args);
 
     //    qDebug() << data.toJson(QJsonDocument::JsonFormat::Compact);
 

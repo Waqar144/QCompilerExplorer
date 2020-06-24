@@ -46,7 +46,7 @@
            <widget class="QComboBox" name="compilerComboBox"/>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit"/>
+           <widget class="QLineEdit" name="argsLineEdit"/>
           </item>
           <item>
            <widget class="QCheckBox" name="checkBox">

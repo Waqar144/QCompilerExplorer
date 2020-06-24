@@ -26,7 +26,7 @@ private slots:
     /* Private Functions */
 private:
     void initConnections();
-    QJsonDocument getCompilationOptions(const QString &source) const;
+    QJsonDocument getCompilationOptions(const QString &source, const QString &userArgs) const;
     /* Private Member Variables*/
 private:
     Ui::MainWindow *ui;
