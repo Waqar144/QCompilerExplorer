@@ -7,6 +7,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include <iostream>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -39,10 +41,60 @@ void MainWindow::updateCompilerComboBox(const QByteArray& data)
     }
 }
 
+void MainWindow::updateAsmTextEdit(const QByteArray& data)
+{
+    //    std::cout << "\n\nRecieved:\n"
+    //              << data.toStdString() << "\n";
+    const QJsonArray assembly = QJsonDocument::fromJson(data).object().value("asm").toArray();
+    QString asmText;
+    for (const auto& line : assembly) {
+        asmText.append(line["text"].toString() + "\n");
+    }
+    //    qDebug() << asmText;
+    ui->asmTextEdit->setPlainText(asmText);
+}
+
 void MainWindow::initConnections()
 {
     connect(GodboltSvc::instance(), &GodboltSvc::languages, this, &MainWindow::setupLanguages);
     connect(GodboltSvc::instance(), &GodboltSvc::compilers, this, &MainWindow::updateCompilerComboBox);
+    connect(GodboltSvc::instance(), &GodboltSvc::asmResult, this, &MainWindow::updateAsmTextEdit);
+}
+
+QJsonDocument MainWindow::getCompilationOptions(const QString& source) const
+{
+    //opt obj
+    QJsonObject optObj;
+    optObj["userArguments"] = "-O3";
+
+    //compiler options obj
+    QJsonObject compilerObj;
+    compilerObj["skipAsm"] = false;
+    compilerObj["executorRequest"] = false;
+    //    compilerOptions = compilerObj;
+
+    //add compileropts to opt obj
+    optObj["compilerOptions"] = compilerObj;
+
+    //filters
+    QJsonObject filterObj;
+    filterObj["binary"] = false;
+    filterObj["commentOnly"] = true;
+    filterObj["demangle"] = true;
+    filterObj["directives"] = true;
+    filterObj["intel"] = true;
+    filterObj["labels"] = true;
+    filterObj["execute"] = false;
+
+    optObj["filters"] = filterObj;
+
+    QJsonObject main;
+    //    main["source"] = "int sum(){ return 2 + 2; }";
+    main["source"] = source;
+    main["options"] = optObj;
+
+    QJsonDocument doc { main };
+    return doc;
 }
 
 void MainWindow::on_languagesComboBox_currentIndexChanged(const QString& arg1)
@@ -50,8 +102,19 @@ void MainWindow::on_languagesComboBox_currentIndexChanged(const QString& arg1)
     Q_UNUSED(arg1)
     const QString languageId = '/' + ui->languagesComboBox->currentData().toString();
     GodboltSvc::instance()->sendRequest(QGodBolt::Endpoints::Compilers, languageId);
+    ui->compilerComboBox->clear();
 }
 
 void MainWindow::on_compileButton_clicked()
 {
+    if (ui->codeTextEdit->toPlainText().isEmpty())
+        return;
+    const QString text = ui->codeTextEdit->toPlainText();
+    auto data = getCompilationOptions(text);
+
+    //    qDebug() << data.toJson(QJsonDocument::JsonFormat::Compact);
+
+    QString endpoint = "compiler/" + ui->compilerComboBox->currentData().toString() + "/compile";
+    //    QString endpoint = "compiler/" + QString("g63") + "/compile";
+    GodboltSvc::instance()->compileRequest(endpoint, data.toJson());
 }

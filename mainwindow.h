@@ -18,14 +18,15 @@ public:
 private slots:
     void setupLanguages(const QByteArray& data);
     void updateCompilerComboBox(const QByteArray& data);
+    void updateAsmTextEdit(const QByteArray& data);
 
-    /* Private Functions */
     void on_languagesComboBox_currentIndexChanged(const QString& arg1);
-
     void on_compileButton_clicked();
 
+    /* Private Functions */
 private:
     void initConnections();
+    QJsonDocument getCompilationOptions(const QString &source) const;
     /* Private Member Variables*/
 private:
     Ui::MainWindow *ui;

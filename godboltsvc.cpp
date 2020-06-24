@@ -22,6 +22,17 @@ void GodboltSvc::sendRequest(QGodBolt::Endpoints endpoint, const QString& additi
     mgr->get(req);
 }
 
+void GodboltSvc::compileRequest(const QString& endpoint, const QByteArray& obj)
+{
+    QString requestUrl = url + endpoint;
+    qDebug() << "Compile Url: " << requestUrl;
+    QNetworkRequest req { QUrl { requestUrl } };
+    req.setRawHeader("ACCEPT", "application/json");
+    req.setRawHeader("Content-Type", "application/json");
+    qDebug() << "Posting compile data";
+    mgr->post(req, obj);
+}
+
 GodboltSvc::GodboltSvc(QObject* parent)
     : QObject(parent)
 {
@@ -32,9 +43,13 @@ GodboltSvc::GodboltSvc(QObject* parent)
 void GodboltSvc::slotNetworkReply(QNetworkReply* reply)
 {
     const QString path = reply->url().path().split('/').at(2);
+    qDebug() << path;
+    qDebug() << reply->url();
     QGodBolt::Endpoints endpoint;
     if (path.startsWith("compilers"))
         endpoint = QGodBolt::stringToEndpoint.value("compilers");
+    else if (path.startsWith("compiler"))
+        endpoint = QGodBolt::stringToEndpoint.value("compiler");
     else
         endpoint = QGodBolt::stringToEndpoint.value(path);
     const QByteArray data = reply->readAll();
@@ -46,6 +61,9 @@ void GodboltSvc::slotNetworkReply(QNetworkReply* reply)
     }
     case QGodBolt::Compilers:
         emit compilers(data);
+        break;
+    case QGodBolt::CompilerCompile:
+        emit asmResult(data);
         break;
     }
 }

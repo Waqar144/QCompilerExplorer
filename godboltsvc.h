@@ -11,6 +11,7 @@ class GodboltSvc : public QObject
 public:
     static GodboltSvc* instance();
     void sendRequest(QGodBolt::Endpoints endpoint, const QString& additional = QString());
+    void compileRequest(const QString& endpoint, const QByteArray& obj);
 
 private slots:
     void slotNetworkReply(QNetworkReply* reply);
@@ -18,6 +19,7 @@ private slots:
 signals:
     void languages(const QByteArray& data);
     void compilers(const QByteArray& data);
+    void asmResult(const QByteArray& data);
 
 private:
     GodboltSvc(QObject* parent = nullptr);
