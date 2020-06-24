@@ -25,11 +25,9 @@ void CompileSvc::sendRequest(QGodBolt::Endpoints endpoint, const QString& additi
 void CompileSvc::compileRequest(const QString& endpoint, const QByteArray& obj)
 {
     QString requestUrl = url + endpoint;
-    qDebug() << "Compile Url: " << requestUrl;
     QNetworkRequest req { QUrl { requestUrl } };
     req.setRawHeader("ACCEPT", "application/json");
     req.setRawHeader("Content-Type", "application/json");
-    qDebug() << "Posting compile data";
     mgr->post(req, obj);
 }
 
@@ -43,8 +41,6 @@ CompileSvc::CompileSvc(QObject* parent)
 void CompileSvc::slotNetworkReply(QNetworkReply* reply)
 {
     const QString path = reply->url().path().split('/').at(2);
-    qDebug() << path;
-    qDebug() << reply->url();
     QGodBolt::Endpoints endpoint;
     if (path.startsWith("compilers"))
         endpoint = QGodBolt::stringToEndpoint.value("compilers");
