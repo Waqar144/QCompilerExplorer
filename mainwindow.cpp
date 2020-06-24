@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "godboltsvc.h"
+#include "compilerservice.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>

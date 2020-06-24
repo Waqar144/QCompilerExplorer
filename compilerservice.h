@@ -1,7 +1,7 @@
 #ifndef GODBOLTSVC_H
 #define GODBOLTSVC_H
 
-#include "godboltendpoints.h"
+#include "ce_endpoints.h"
 #include <QObject>
 #include <QtNetwork/QNetworkAccessManager>
 

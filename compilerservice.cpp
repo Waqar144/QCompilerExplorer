@@ -1,4 +1,4 @@
-#include "godboltsvc.h"
+#include "compilerservice.h"
 
 #include <QtNetwork/QNetworkReply>
 
