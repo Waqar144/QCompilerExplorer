@@ -34,7 +34,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QPlainTextEdit" name="codeTextEdit"/>
+         <widget class="QCodeEditor" name="codeTextEdit"/>
         </item>
        </layout>
       </item>
@@ -78,6 +78,13 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QCodeEditor</class>
+   <extends>QPlainTextEdit</extends>
+   <header location="global">widgets/QCodeEditor.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

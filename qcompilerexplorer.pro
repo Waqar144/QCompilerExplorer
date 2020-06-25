@@ -20,11 +20,17 @@ include(QSourceHighlite/QSourceHighlite.pri)
 SOURCES += \
     compilerservice.cpp \
     main.cpp \
+    widgets/QCodeEditor.cpp \
+    widgets/QLineNumberArea.cpp \
+    widgets/QFramedTextAttribute.cpp \
     mainwindow.cpp
 
 HEADERS += \
     ce_endpoints.h \
     compilerservice.h \
+    widgets/QCodeEditor.h \
+    widgets/QLineNumberArea.h \
+    widgets/QFramedTextAttribute.h \
     mainwindow.h
 
 FORMS += \
