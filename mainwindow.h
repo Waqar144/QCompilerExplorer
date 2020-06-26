@@ -26,9 +26,10 @@ private slots:
     void on_compileButton_clicked();
 
     /* Private Functions */
+    void on_compilerComboBox_currentIndexChanged(const QString& arg1);
+
 private:
     void initConnections();
-    void setupCodeEditor();
     QJsonDocument getCompilationOptions(const QString &source, const QString &userArgs) const;
     /* Private Member Variables*/
 private:

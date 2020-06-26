@@ -6,6 +6,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSettings>
 
 #include <iostream>
 
@@ -17,7 +18,6 @@ MainWindow::MainWindow(QWidget* parent)
     ui->asmTextEdit->setReadOnly(true);
 
     initConnections();
-    setupCodeEditor();
 
     CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
 }
@@ -29,18 +29,30 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupLanguages(const QByteArray& data)
 {
+    QSettings settings;
     const QJsonArray json = QJsonDocument::fromJson(data).array();
+    ui->languagesComboBox->blockSignals(true);
     for (const auto& value : json) {
-        ui->languagesComboBox->addItem(value["name"].toString(), value["id"].toString());
+        const auto lang = value["name"].toString();
+        ui->languagesComboBox->addItem(lang, value["id"].toString());
     }
+    ui->languagesComboBox->blockSignals(false);
+    auto lang = settings.value(QStringLiteral("lastUsedLanguage")).toString();
+    ui->languagesComboBox->setCurrentText(lang);
 }
 
 void MainWindow::updateCompilerComboBox(const QByteArray& data)
 {
+    QSettings settings;
     const QJsonArray json = QJsonDocument::fromJson(data).array();
+    ui->compilerComboBox->blockSignals(true);
     for (const auto& value : json) {
-        ui->compilerComboBox->addItem(value["name"].toString(), value["id"].toString());
+        const auto compiler = value["name"].toString();
+        ui->compilerComboBox->addItem(compiler, value["id"].toString());
     }
+    ui->compilerComboBox->blockSignals(false);
+    auto compiler = settings.value(QStringLiteral("lastUsedCompilerFor") + ui->languagesComboBox->currentText()).toString();
+    ui->compilerComboBox->setCurrentText(compiler);
 }
 
 void MainWindow::updateAsmTextEdit(const QByteArray& data)
@@ -107,6 +119,8 @@ void MainWindow::on_languagesComboBox_currentIndexChanged(const QString& arg1)
     CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Compilers, languageId);
     ui->codeTextEdit->setCurrentLanguage(language);
     ui->compilerComboBox->clear();
+    QSettings settings;
+    settings.setValue("lastUsedLanguage", arg1);
 }
 
 void MainWindow::on_compileButton_clicked()
@@ -122,4 +136,10 @@ void MainWindow::on_compileButton_clicked()
     QString endpoint = "compiler/" + ui->compilerComboBox->currentData().toString() + "/compile";
     //    QString endpoint = "compiler/" + QString("g63") + "/compile";
     CompileSvc::instance()->compileRequest(endpoint, data.toJson());
+}
+
+void MainWindow::on_compilerComboBox_currentIndexChanged(const QString& arg1)
+{
+    QSettings settings;
+    settings.setValue("lastUsedCompilerFor" + ui->languagesComboBox->currentText(), arg1);
 }
