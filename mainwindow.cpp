@@ -7,8 +7,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSettings>
+#include <QSplitter>
 
-#include <iostream>
+//#include <iostream>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -18,6 +19,10 @@ MainWindow::MainWindow(QWidget* parent)
     ui->asmTextEdit->setReadOnly(true);
 
     initConnections();
+    split = new QSplitter();
+    split->addWidget(ui->codeTextEdit);
+    split->addWidget(ui->asmTextEdit);
+    ui->centralwidget->layout()->addWidget(split);
 
     CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
 }
@@ -75,7 +80,7 @@ void MainWindow::initConnections()
     connect(CompileSvc::instance(), &CompileSvc::asmResult, this, &MainWindow::updateAsmTextEdit);
 }
 
-QJsonDocument MainWindow::getCompilationOptions(const QString& source, const QString& userArgs) const
+QJsonDocument MainWindow::getCompilationOptions(const QString& source, const QString& userArgs, bool isIntel) const
 {
     //opt obj
     QJsonObject optObj;
@@ -96,7 +101,7 @@ QJsonDocument MainWindow::getCompilationOptions(const QString& source, const QSt
     filterObj["commentOnly"] = true;
     filterObj["demangle"] = true;
     filterObj["directives"] = true;
-    filterObj["intel"] = true;
+    filterObj["intel"] = isIntel;
     filterObj["labels"] = true;
     filterObj["execute"] = false;
 
@@ -129,7 +134,8 @@ void MainWindow::on_compileButton_clicked()
         return;
     const QString text = ui->codeTextEdit->toPlainText();
     const QString args = ui->argsLineEdit->text();
-    auto data = getCompilationOptions(text, args);
+    bool isIntel = ui->isIntelSyntax->isChecked();
+    auto data = getCompilationOptions(text, args, isIntel);
 
     //    qDebug() << data.toJson(QJsonDocument::JsonFormat::Compact);
 

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSplitter>
 
 #include "QSourceHighlite/qsourcehighliter.h"
 
@@ -30,9 +31,10 @@ private slots:
 
 private:
     void initConnections();
-    QJsonDocument getCompilationOptions(const QString &source, const QString &userArgs) const;
+    QJsonDocument getCompilationOptions(const QString& source, const QString& userArgs, bool isIntel) const;
     /* Private Member Variables*/
 private:
     Ui::MainWindow *ui;
+    QSplitter* split;
 };
 #endif // MAINWINDOW_H
