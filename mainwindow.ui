@@ -33,9 +33,6 @@
           </item>
          </layout>
         </item>
-        <item>
-         <widget class="QCodeEditor" name="codeTextEdit"/>
-        </item>
        </layout>
       </item>
       <item>
@@ -46,7 +43,7 @@
            <widget class="QComboBox" name="compilerComboBox">
             <property name="minimumSize">
              <size>
-              <width>150</width>
+              <width>200</width>
               <height>0</height>
              </size>
             </property>
@@ -56,7 +53,7 @@
            <widget class="QLineEdit" name="argsLineEdit"/>
           </item>
           <item>
-           <widget class="QCheckBox" name="checkBox">
+           <widget class="QCheckBox" name="isIntelSyntax">
             <property name="text">
              <string>Intel Syntax</string>
             </property>
@@ -64,12 +61,15 @@
           </item>
          </layout>
         </item>
-        <item>
-         <widget class="QPlainTextEdit" name="asmTextEdit"/>
-        </item>
        </layout>
       </item>
      </layout>
+    </item>
+    <item>
+     <widget class="QPlainTextEdit" name="asmTextEdit"/>
+    </item>
+    <item>
+     <widget class="QCodeEditor" name="codeTextEdit"/>
     </item>
    </layout>
   </widget>
