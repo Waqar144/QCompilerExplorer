@@ -6,6 +6,8 @@
 
 #include "QSourceHighlite/qsourcehighliter.h"
 
+#include "asmhighlighter.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -22,6 +24,7 @@ private slots:
     void setupLanguages(const QByteArray& data);
     void updateCompilerComboBox(const QByteArray& data);
     void updateAsmTextEdit(const QByteArray& data);
+    void setupAsmTextEdit();
 
     void on_languagesComboBox_currentIndexChanged(const QString& arg1);
     void on_compileButton_clicked();
@@ -36,5 +39,6 @@ private:
 private:
     Ui::MainWindow *ui;
     QSplitter* split;
+    AsmHighlighter* asmHighlighter;
 };
 #endif // MAINWINDOW_H
