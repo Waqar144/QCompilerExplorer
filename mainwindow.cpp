@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     setupAsmTextEdit();
 
-    //    CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
+    CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
 }
 
 MainWindow::~MainWindow()
@@ -78,22 +78,22 @@ void MainWindow::updateAsmTextEdit(const QByteArray& data)
 void MainWindow::setupAsmTextEdit()
 {
     asmHighlighter = new AsmHighlighter { ui->asmTextEdit->document() };
-    QString asmm = "section .text\n\tstr: db \"hello\", 0\nsection .text\n\tglobal _start\n";
-    asmm.append("_start:\n\tmov rax, 10\n\t");
-    asmm.append("cmovb ebx, 10\n\t");
-    asmm.append("add eax, 20\n\t");
-    asmm.append("push rbp\n\t");
-    asmm.append("mov rbp, rsp\n\t");
-    asmm.append("ret\n\t");
-    ui->asmTextEdit->setPlainText(asmm);
+    //    QString asmm = "section .text\n\tstr: db \"hello\", 0\nsection .text\n\tglobal _start\n";
+    //    asmm.append("_start:\n\tmov rax, 10\n\t");
+    //    asmm.append("cmovb ebx, 10\n\t");
+    //    asmm.append("add eax, 20\n\t");
+    //    asmm.append("push rbp\n\t");
+    //    asmm.append("mov rbp, rsp\n\t");
+    //    asmm.append("ret\n\t");
+    //    ui->asmTextEdit->setPlainText(asmm);
 
     auto font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    font.setPixelSize(12);
+    font.setPixelSize(14);
     ui->asmTextEdit->setFont(font);
     ui->asmTextEdit->setTabStopDistance(4 * QFontMetrics(font).horizontalAdvance(' '));
 
     //set background
-    //ui->codeTextEdit->setStyleSheet("background-color: #272822;");
+    ui->asmTextEdit->setStyleSheet("background-color: #272822; color: #e3e2d6;");
 }
 
 void MainWindow::initConnections()

@@ -2116,9 +2116,9 @@ void AsmHighlighter::highlightBlock(const QString& text)
         "ptr"
     };
     QTextCharFormat fmtReg;
-    fmtReg.setForeground(QColor("red"));
+    fmtReg.setForeground(QColor(102, 217, 239));
     QTextCharFormat fmtKey;
-    fmtKey.setForeground(QColor("green"));
+    fmtKey.setForeground(QColor(249, 38, 114));
     const auto tokens = text.splitRef(QRegularExpression("\\s|,"));
     for (const auto& token : tokens) {
         if (regs.contains(token.trimmed().toString())) {
@@ -2128,9 +2128,31 @@ void AsmHighlighter::highlightBlock(const QString& text)
         }
     }
 
+    //labels
+    static QTextCharFormat fmtLabel;
+    fmtLabel.setForeground(QColor(166, 226, 46));
+
+    QRegularExpression label_regex("\\w+:");
+    auto label_itr = label_regex.globalMatch(text);
+    while (label_itr.hasNext()) {
+        auto m = label_itr.next();
+        setFormat(m.capturedStart(), m.capturedEnd(), fmtLabel);
+    }
+
+    //string literals
+    static QTextCharFormat fmtStr;
+    fmtStr.setForeground(QColor(230, 219, 116));
+
+    QRegularExpression str_regex("\\\"\\w+\\\"");
+    auto matcher = str_regex.globalMatch(text);
+    while (matcher.hasNext()) {
+        auto match = matcher.next();
+        setFormat(match.capturedStart(), match.capturedEnd(), fmtStr);
+    }
+
     //number format
     static QTextCharFormat fmtNum;
-    fmtNum.setForeground(QColor("blue"));
+    fmtNum.setForeground(QColor(174, 129, 255));
     auto regex = QRegularExpression("\\d+");
     auto match = regex.globalMatch(text);
     while (match.hasNext()) {
