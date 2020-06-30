@@ -2,7 +2,7 @@
 
 #include <QtNetwork/QNetworkReply>
 
-static QString url = QStringLiteral("https://godbolt.org/api/");
+static const char url[] = "https://godbolt.org/api/";
 
 CompileSvc* CompileSvc::instance()
 {

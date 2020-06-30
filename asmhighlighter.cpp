@@ -9,7 +9,8 @@ AsmHighlighter::AsmHighlighter(QTextDocument* parent)
 
 void AsmHighlighter::highlightBlock(const QString& text)
 {
-    static QSet<QString> keywords = {
+    //TODO: improve this soon
+    static QVector<QString> keywords = {
         "lock",
         "rep",
         "repe",
@@ -1809,7 +1810,7 @@ void AsmHighlighter::highlightBlock(const QString& text)
 
     };
 
-    QSet<QString> regs = {
+    static QVector<QString> regs = {
         "ip",
         "eip",
         "rip",
