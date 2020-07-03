@@ -28,8 +28,7 @@ private slots:
 
     void on_languagesComboBox_currentIndexChanged(const QString& arg1);
     void on_compileButton_clicked();
-
-    /* Private Functions */
+    void openSettingsDialog();
     void on_compilerComboBox_currentIndexChanged(const QString& arg1);
 
 private:

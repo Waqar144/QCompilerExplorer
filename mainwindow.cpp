@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include "compilerservice.h"
+#include "settingsdialog.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -33,7 +34,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     setupAsmTextEdit();
 
-    CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
+    //    CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
 }
 
 MainWindow::~MainWindow()
@@ -90,14 +91,14 @@ void MainWindow::updateAsmTextEdit(const QByteArray& data)
 void MainWindow::setupAsmTextEdit()
 {
     asmHighlighter = new AsmHighlighter { ui->asmTextEdit->document() };
-    //    QString asmm = "section .text\n\tstr: db \"hello\", 0\nsection .text\n\tglobal _start\n";
-    //    asmm.append("_start:\n\tmov rax, 10\n\t");
-    //    asmm.append("cmovb ebx, 10\n\t");
-    //    asmm.append("add eax, 20\n\t");
-    //    asmm.append("push rbp\n\t");
-    //    asmm.append("mov rbp, rsp\n\t");
-    //    asmm.append("ret\n\t");
-    //    ui->asmTextEdit->setPlainText(asmm);
+    QString asmm = "section .text\n\tstr: db \"hello\", 0\nsection .text\n\tglobal _start\n";
+    asmm.append("_start:\n\tmov rax, 10\n\t");
+    asmm.append("cmovb ebx, 10\n\t");
+    asmm.append("add eax, 20\n\t");
+    asmm.append("push rbp\n\t");
+    asmm.append("mov rbp, rsp\n\t");
+    asmm.append("ret\n\t");
+    ui->asmTextEdit->setPlainText(asmm);
 
     auto font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     font.setPixelSize(14);
@@ -113,6 +114,7 @@ void MainWindow::initConnections()
     connect(CompileSvc::instance(), &CompileSvc::languages, this, &MainWindow::setupLanguages);
     connect(CompileSvc::instance(), &CompileSvc::compilers, this, &MainWindow::updateCompilerComboBox);
     connect(CompileSvc::instance(), &CompileSvc::asmResult, this, &MainWindow::updateAsmTextEdit);
+    connect(ui->actionSettings, &QAction::triggered, this, &MainWindow::openSettingsDialog);
 }
 
 QJsonDocument MainWindow::getCompilationOptions(const QString& source, const QString& userArgs, bool isIntel) const
@@ -177,6 +179,23 @@ void MainWindow::on_compileButton_clicked()
     QString endpoint = "compiler/" + ui->compilerComboBox->currentData().toString() + "/compile";
     //    QString endpoint = "compiler/" + QString("g63") + "/compile";
     CompileSvc::instance()->compileRequest(endpoint, data.toJson());
+}
+
+void MainWindow::openSettingsDialog()
+{
+    SettingsDialog dialog(this);
+    connect(&dialog, &SettingsDialog::fontChanged, ui->codeTextEdit, &QCodeEditor::updateFont);
+    connect(&dialog, &SettingsDialog::fontSizeChanged, ui->codeTextEdit, &QCodeEditor::updateFontSize);
+    connect(&dialog, &SettingsDialog::fontChanged, ui->asmTextEdit, [this](const QString& f) {
+        ui->asmTextEdit->setFont(QFont(f));
+    });
+    connect(&dialog, &SettingsDialog::fontSizeChanged, ui->asmTextEdit, [this](const qreal f) {
+        QFont font = ui->asmTextEdit->font();
+        font.setPointSize(f);
+        ui->asmTextEdit->setFont(font);
+    });
+
+    dialog.exec();
 }
 
 void MainWindow::on_compilerComboBox_currentIndexChanged(const QString& arg1)

@@ -21,6 +21,7 @@ SOURCES += \
     asmhighlighter.cpp \
     compilerservice.cpp \
     main.cpp \
+    settingsdialog.cpp \
     widgets/QCodeEditor.cpp \
     widgets/QLineNumberArea.cpp \
     widgets/QFramedTextAttribute.cpp \
@@ -30,13 +31,15 @@ HEADERS += \
     asmhighlighter.h \
     ce_endpoints.h \
     compilerservice.h \
+    settingsdialog.h \
     widgets/QCodeEditor.h \
     widgets/QLineNumberArea.h \
     widgets/QFramedTextAttribute.h \
     mainwindow.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    settingsdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
