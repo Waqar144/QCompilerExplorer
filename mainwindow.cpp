@@ -28,6 +28,9 @@ MainWindow::MainWindow(QWidget* parent)
     auto isIntel = settings.value("intelSyntax").toBool();
     ui->isIntelSyntax->setChecked(isIntel);
 
+    restoreGeometry(settings.value("geometry").toByteArray());
+    restoreState(settings.value("windowState").toByteArray());
+
     setupAsmTextEdit();
 
     CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
@@ -38,6 +41,8 @@ MainWindow::~MainWindow()
     //save the value of intel syntax
     QSettings settings;
     settings.setValue("intelSyntax", ui->isIntelSyntax->isChecked());
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("windowState", saveState());
     delete ui;
 }
 
