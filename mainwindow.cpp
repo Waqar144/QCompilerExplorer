@@ -24,6 +24,10 @@ MainWindow::MainWindow(QWidget* parent)
     split->addWidget(ui->asmTextEdit);
     ui->centralwidget->layout()->addWidget(split);
 
+    QSettings settings;
+    auto isIntel = settings.value("intelSyntax").toBool();
+    ui->isIntelSyntax->setChecked(isIntel);
+
     setupAsmTextEdit();
 
     CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
@@ -31,6 +35,9 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow()
 {
+    //save the value of intel syntax
+    QSettings settings;
+    settings.setValue("intelSyntax", ui->isIntelSyntax->isChecked());
     delete ui;
 }
 
