@@ -31,6 +31,17 @@ void CompileSvc::compileRequest(const QString& endpoint, const QByteArray& obj)
     mgr->post(req, obj);
 }
 
+QNetworkReply* CompileSvc::tooltipRequest(const QString& asmWord)
+{
+    QNetworkRequest request;
+    QString urlString = url;
+    urlString += "asm/" + asmWord;
+    request.setRawHeader("ACCEPT", "application/json");
+    request.setRawHeader("Content-Type", "application/json");
+    request.setUrl(urlString);
+    return mgr->get(request);
+}
+
 CompileSvc::~CompileSvc()
 {
     delete mgr;
@@ -51,6 +62,8 @@ void CompileSvc::slotNetworkReply(QNetworkReply* reply)
         endpoint = QGodBolt::stringToEndpoint.value("compilers");
     else if (path.startsWith("compiler"))
         endpoint = QGodBolt::stringToEndpoint.value("compiler");
+    else if (path.startsWith("asm"))
+        return;
     else
         endpoint = QGodBolt::stringToEndpoint.value(path);
     const QByteArray data = reply->readAll();

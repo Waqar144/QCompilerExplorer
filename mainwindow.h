@@ -39,5 +39,7 @@ private:
     Ui::MainWindow *ui;
     QSplitter* split;
     AsmHighlighter* asmHighlighter;
+
+    // QWidget interface
 };
 #endif // MAINWINDOW_H

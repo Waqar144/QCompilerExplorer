@@ -8,19 +8,19 @@ namespace QGodBolt
 enum Endpoints {
     Languages,
     Compilers,
-    CompilerCompile
+    CompilerCompile,
 };
 
 static const QHash<Endpoints, QString> endpointsToString = {
     { Endpoints::Languages, "languages" },
     { Endpoints::Compilers, "compilers" },
-    { Endpoints::CompilerCompile, "compiler" }
+    { Endpoints::CompilerCompile, "compiler" },
 };
 
 static const QHash<QString, Endpoints> stringToEndpoint = {
     { "languages", Endpoints::Languages },
     { "compilers", Endpoints::Compilers },
-    { "compiler", Endpoints::CompilerCompile }
+    { "compiler", Endpoints::CompilerCompile },
 };
 }
 

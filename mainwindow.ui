@@ -69,7 +69,7 @@
      <widget class="QCodeEditor" name="codeTextEdit"/>
     </item>
     <item>
-     <widget class="QPlainTextEdit" name="asmTextEdit"/>
+     <widget class="AsmTextEdit" name="asmTextEdit"/>
     </item>
    </layout>
   </widget>
@@ -102,6 +102,11 @@
    <class>QCodeEditor</class>
    <extends>QPlainTextEdit</extends>
    <header location="global">widgets/QCodeEditor.h</header>
+  </customwidget>
+  <customwidget>
+   <class>AsmTextEdit</class>
+   <extends>QPlainTextEdit</extends>
+   <header>asmtextedit.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

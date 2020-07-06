@@ -235,4 +235,3 @@ private:
 
     static QHash<QString, QSourceHighlite::QSourceHighliter::Language> _langStringToEnum;
 };
-

@@ -90,27 +90,15 @@ void MainWindow::updateAsmTextEdit(const QByteArray& data)
 
 void MainWindow::setupAsmTextEdit()
 {
-    asmHighlighter = new AsmHighlighter { ui->asmTextEdit->document() };
-    QString asmm = "section .text\n\tstr: db \"hello\", 0\nsection .text\n\tglobal _start\n";
-    asmm.append("_start:\n\tmov rax, 10\n\t");
-    asmm.append("cmovb ebx, 10\n\t");
-    asmm.append("add eax, 20\n\t");
-    asmm.append("push rbp\n\t");
-    asmm.append("mov rbp, rsp\n\t");
-    asmm.append("ret\n\t");
-    ui->asmTextEdit->setPlainText(asmm);
-
-    QSettings settings;
-    QString fontSetting = settings.value("font").toString();
-    QFont font = fontSetting.isEmpty() ? QFontDatabase::systemFont(QFontDatabase::FixedFont) : fontSetting;
-    font.setFixedPitch(true);
-    font.setPointSize(settings.value("fontSize", 12).toInt());
-
-    ui->asmTextEdit->setFont(font);
-    ui->asmTextEdit->setTabStopDistance(4 * QFontMetrics(font).horizontalAdvance(' '));
-
-    //set background
-    ui->asmTextEdit->setStyleSheet("background-color: #272822; color: #e3e2d6;");
+    //    asmHighlighter = new AsmHighlighter { ui->asmTextEdit->document() };
+    //    QString asmm = "section .text\n\tstr: db \"hello\", 0\nsection .text\n\tglobal _start\n";
+    //    asmm.append("_start:\n\tmov rax, 10\n\t");
+    //    asmm.append("cmovb ebx, 10\n\t");
+    //    asmm.append("add eax, 20\n\t");
+    //    asmm.append("push rbp\n\t");
+    //    asmm.append("mov rbp, rsp\n\t");
+    //    asmm.append("ret\n\t");
+    //    ui->asmTextEdit->setPlainText(asmm);
 }
 
 void MainWindow::initConnections()

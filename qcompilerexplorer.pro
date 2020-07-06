@@ -25,6 +25,7 @@ SOURCES += \
     widgets/QCodeEditor.cpp \
     widgets/QLineNumberArea.cpp \
     widgets/QFramedTextAttribute.cpp \
+    asmtextedit.cpp \
     mainwindow.cpp
 
 HEADERS += \
@@ -35,6 +36,7 @@ HEADERS += \
     widgets/QCodeEditor.h \
     widgets/QLineNumberArea.h \
     widgets/QFramedTextAttribute.h \
+    asmtextedit.h \
     mainwindow.h
 
 FORMS += \

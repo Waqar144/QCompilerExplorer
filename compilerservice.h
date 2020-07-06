@@ -12,6 +12,7 @@ public:
     static CompileSvc* instance();
     void sendRequest(QGodBolt::Endpoints endpoint, const QString& additional = QString());
     void compileRequest(const QString& endpoint, const QByteArray& obj);
+    QNetworkReply* tooltipRequest(const QString& asmWord);
 
     ~CompileSvc();
 
