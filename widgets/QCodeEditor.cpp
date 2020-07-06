@@ -10,10 +10,12 @@
 #include <QAbstractTextDocumentLayout>
 #include <QCompleter>
 #include <QCursor>
+#include <QDebug>
 #include <QFontDatabase>
 #include <QMimeData>
 #include <QPaintEvent>
 #include <QScrollBar>
+#include <QSettings>
 #include <QShortcut>
 #include <QTextBlock>
 #include <QTextCharFormat>
@@ -39,7 +41,7 @@ static QVector<QPair<QString, QString>> parentheses = {
 
 QCodeEditor::QCodeEditor(QWidget* widget)
     : QTextEdit(widget)
-    , m_highlighter(nullptr)
+    , m_highlighter(new QSourceHighlite::QSourceHighliter(document()))
     , m_lineNumberArea(new QLineNumberArea(this))
     , m_framedAttribute(new QFramedTextAttribute(this))
     , m_autoIndentation(true)
@@ -51,11 +53,8 @@ QCodeEditor::QCodeEditor(QWidget* widget)
     initFont();
     performConnections();
 
-    m_highlighter = new QSourceHighlite::QSourceHighliter(document());
     m_highlighter->setTheme(QSourceHighlite::QSourceHighliter::Monokai);
     setStyleSheet("background-color: #272822;");
-
-    //    setSyntaxStyle(QSyntaxStyle::defaultStyle());
 }
 
 void QCodeEditor::initDocumentLayoutHandlers()
@@ -64,15 +63,17 @@ void QCodeEditor::initDocumentLayoutHandlers()
         ->documentLayout()
         ->registerHandler(
             QFramedTextAttribute::type(),
-            m_framedAttribute
-        );
+            m_framedAttribute);
 }
 
 void QCodeEditor::initFont()
 {
-    auto font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    QSettings settings;
+    QString fontSetting = settings.value("font").toString();
+    QFont font = fontSetting.isEmpty() ? QFontDatabase::systemFont(QFontDatabase::FixedFont) : fontSetting;
+
     font.setFixedPitch(true);
-    font.setPointSize(10);
+    font.setPointSize(settings.value("fontSize", 12).toInt());
     setTabStopDistance(4 * QFontMetrics(font).horizontalAdvance(' '));
 
     setFont(font);
@@ -128,31 +129,6 @@ void QCodeEditor::updateStyle()
         m_highlighter->rehighlight();
     }
 
-    //    if (m_syntaxStyle)
-    //    {
-    //        auto currentPalette = palette();
-
-    //        // Setting text format/color
-    //        currentPalette.setColor(
-    //            QPalette::ColorRole::Text,
-    //            m_syntaxStyle->getFormat("Text").foreground().color()
-    //        );
-
-    //        // Setting common background
-    //        currentPalette.setColor(
-    //            QPalette::Base,
-    //            m_syntaxStyle->getFormat("Text").background().color()
-    //        );
-
-    //        // Setting selection color
-    //        currentPalette.setColor(
-    //            QPalette::Highlight,
-    //            m_syntaxStyle->getFormat("Selection").background().color()
-    //        );
-
-    //        setPalette(currentPalette);
-    //    }
-
     updateExtraSelection();
 }
 
@@ -186,6 +162,30 @@ void QCodeEditor::onSelectionChanged()
     }
 }
 
+void QCodeEditor::updateFont(const QString& fontName)
+{
+    QFont font(fontName);
+    font.setPointSize(this->font().pointSize());
+    font.setFixedPitch(true);
+    setTabStopDistance(4 * QFontMetrics(font).horizontalAdvance(' '));
+    setFont(font);
+    qDebug() << fontName;
+    //    setFontFamily(fontName);
+}
+
+void QCodeEditor::updateFontSize(qreal fontSize)
+{
+    QTextCursor cursor = this->textCursor();
+    this->selectAll();
+    QFont font = this->font();
+    font.setPointSize(fontSize);
+    //    setFontPointSize(fontSize);
+    font.setFixedPitch(true);
+    setTabStopDistance(4 * QFontMetrics(font).horizontalAdvance(' '));
+    setFont(font);
+    setTextCursor(cursor);
+}
+
 void QCodeEditor::resizeEvent(QResizeEvent* e)
 {
     QTextEdit::resizeEvent(e);
@@ -198,11 +198,9 @@ void QCodeEditor::updateLineGeometry()
     QRect cr = contentsRect();
     m_lineNumberArea->setGeometry(
         QRect(cr.left(),
-              cr.top(),
-              m_lineNumberArea->sizeHint().width(),
-              cr.height()
-        )
-    );
+            cr.top(),
+            m_lineNumberArea->sizeHint().width(),
+            cr.height()));
 }
 
 void QCodeEditor::updateLineNumberAreaWidth(int)
@@ -216,12 +214,10 @@ void QCodeEditor::updateLineNumberArea(const QRect& rect)
         0,
         rect.y(),
         m_lineNumberArea->sizeHint().width(),
-        rect.height()
-    );
+        rect.height());
     updateLineGeometry();
 
-    if (rect.contains(viewport()->rect()))
-    {
+    if (rect.contains(viewport()->rect())) {
         updateLineNumberAreaWidth(0);
     }
 }

@@ -116,6 +116,10 @@ public Q_SLOTS:
      */
     void onSelectionChanged();
 
+    void updateFont(const QString& fontName);
+
+    void updateFontSize(qreal fontSize);
+
 protected:
     /**
      * @brief Method, that's called on any text insertion of

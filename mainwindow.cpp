@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     setupAsmTextEdit();
 
-    //    CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
+    CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
 }
 
 MainWindow::~MainWindow()
@@ -100,8 +100,12 @@ void MainWindow::setupAsmTextEdit()
     asmm.append("ret\n\t");
     ui->asmTextEdit->setPlainText(asmm);
 
-    auto font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    font.setPixelSize(14);
+    QSettings settings;
+    QString fontSetting = settings.value("font").toString();
+    QFont font = fontSetting.isEmpty() ? QFontDatabase::systemFont(QFontDatabase::FixedFont) : fontSetting;
+    font.setFixedPitch(true);
+    font.setPointSize(settings.value("fontSize", 12).toInt());
+
     ui->asmTextEdit->setFont(font);
     ui->asmTextEdit->setTabStopDistance(4 * QFontMetrics(font).horizontalAdvance(' '));
 
@@ -185,7 +189,7 @@ void MainWindow::openSettingsDialog()
 {
     SettingsDialog dialog(this);
     connect(&dialog, &SettingsDialog::fontChanged, ui->codeTextEdit, &QCodeEditor::updateFont);
-    connect(&dialog, &SettingsDialog::fontSizeChanged, ui->codeTextEdit, &QCodeEditor::updateFontSize);
+    //    connect(&dialog, &SettingsDialog::fontSizeChanged, ui->codeTextEdit, &QCodeEditor::updateFontSize);
     connect(&dialog, &SettingsDialog::fontChanged, ui->asmTextEdit, [this](const QString& f) {
         ui->asmTextEdit->setFont(QFont(f));
     });
@@ -193,6 +197,11 @@ void MainWindow::openSettingsDialog()
         QFont font = ui->asmTextEdit->font();
         font.setPointSize(f);
         ui->asmTextEdit->setFont(font);
+    });
+    connect(&dialog, &SettingsDialog::fontSizeChanged, ui->codeTextEdit, [this](const qreal f) {
+        QFont font = ui->asmTextEdit->font();
+        font.setPointSize(f);
+        ui->codeTextEdit->setFont(font);
     });
 
     dialog.exec();
