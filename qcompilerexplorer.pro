@@ -15,7 +15,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-include(QSourceHighlite/QSourceHighlite.pri)
+### For some reason, i am unable to change font size of the editor if i include like this in Qt 5.12
+### It works fine with Qt 5.15 / 5.14 though
+#include(QSourceHighlite/QSourceHighlite.pri)
 
 SOURCES += \
     asmhighlighter.cpp \
@@ -26,7 +28,10 @@ SOURCES += \
     widgets/QLineNumberArea.cpp \
     widgets/QFramedTextAttribute.cpp \
     asmtextedit.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    QSourceHighlite/qsourcehighliter.cpp \
+    QSourceHighlite/languagedata.cpp \
+    QSourceHighlite/qsourcehighliterthemes.cpp
 
 HEADERS += \
     asmhighlighter.h \
@@ -37,7 +42,10 @@ HEADERS += \
     widgets/QLineNumberArea.h \
     widgets/QFramedTextAttribute.h \
     asmtextedit.h \
-    mainwindow.h
+    mainwindow.h \
+    QSourceHighlite/qsourcehighliter.h \
+    QSourceHighlite/languagedata.h \
+    QSourceHighlite/qsourcehighliterthemes.h
 
 FORMS += \
     mainwindow.ui \
