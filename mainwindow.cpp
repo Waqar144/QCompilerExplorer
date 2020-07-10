@@ -10,8 +10,6 @@
 #include <QSettings>
 #include <QSplitter>
 
-//#include <iostream>
-
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -30,8 +28,6 @@ MainWindow::MainWindow(QWidget* parent)
 
     restoreGeometry(settings.value("geometry").toByteArray());
     restoreState(settings.value("windowState").toByteArray());
-
-    setupAsmTextEdit();
 
     CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
 }
@@ -85,19 +81,6 @@ void MainWindow::updateAsmTextEdit(const QByteArray& data)
     }
     //    qDebug() << asmText;
     ui->asmTextEdit->setPlainText(asmText);
-}
-
-void MainWindow::setupAsmTextEdit()
-{
-    //    asmHighlighter = new AsmHighlighter { ui->asmTextEdit->document() };
-    //    QString asmm = "section .text\n\tstr: db \"hello\", 0\nsection .text\n\tglobal _start\n";
-    //    asmm.append("_start:\n\tmov rax, 10\n\t");
-    //    asmm.append("cmovb ebx, 10\n\t");
-    //    asmm.append("add eax, 20\n\t");
-    //    asmm.append("push rbp\n\t");
-    //    asmm.append("mov rbp, rsp\n\t");
-    //    asmm.append("ret\n\t");
-    //    ui->asmTextEdit->setPlainText(asmm);
 }
 
 void MainWindow::initConnections()
@@ -175,7 +158,6 @@ void MainWindow::openSettingsDialog()
 {
     SettingsDialog dialog(this);
     connect(&dialog, &SettingsDialog::fontChanged, ui->codeTextEdit, &QCodeEditor::updateFont);
-    //    connect(&dialog, &SettingsDialog::fontSizeChanged, ui->codeTextEdit, &QCodeEditor::updateFontSize);
     connect(&dialog, &SettingsDialog::fontChanged, ui->asmTextEdit, [this](const QString& f) {
         ui->asmTextEdit->setFont(QFont(f));
     });

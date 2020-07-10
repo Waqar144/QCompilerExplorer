@@ -20,7 +20,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #include(QSourceHighlite/QSourceHighlite.pri)
 
 SOURCES += \
-    asmhighlighter.cpp \
     compilerservice.cpp \
     main.cpp \
     settingsdialog.cpp \

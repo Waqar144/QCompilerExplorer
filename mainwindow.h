@@ -24,7 +24,6 @@ private slots:
     void setupLanguages(const QByteArray& data);
     void updateCompilerComboBox(const QByteArray& data);
     void updateAsmTextEdit(const QByteArray& data);
-    void setupAsmTextEdit();
 
     void on_languagesComboBox_currentIndexChanged(const QString& arg1);
     void on_compileButton_clicked();

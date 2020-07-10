@@ -15,9 +15,6 @@ public:
     // QWidget interface
 protected:
     void mouseMoveEvent(QMouseEvent* event);
-
-    //private:
-    //    AsmHighlighter* m_highlighter;
 };
 
 #endif // ASMTEXTEDIT_H
