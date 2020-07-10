@@ -10,10 +10,14 @@
 #include <qsettings.h>
 
 AsmTextEdit::AsmTextEdit(QWidget* parent)
-    : QPlainTextEdit { parent }
-    , m_highlighter { new AsmHighlighter { document() } }
+    : QCodeEditor { parent }
+//    , m_highlighter { new AsmHighlighter { document() } }
 {
     setMouseTracking(true);
+
+    getHighlighter()->setCurrentLanguage(QSourceHighlite::QSourceHighliter::Language::CodeAsm);
+
+    setReadOnly(false);
 
     QSettings settings;
     QString fontSetting = settings.value("font").toString();

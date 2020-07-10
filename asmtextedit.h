@@ -1,11 +1,12 @@
 #ifndef ASMTEXTEDIT_H
 #define ASMTEXTEDIT_H
 
+#include "widgets/QCodeEditor.h"
 #include <QPlainTextEdit>
 
 #include "asmhighlighter.h"
 
-class AsmTextEdit : public QPlainTextEdit
+class AsmTextEdit : public QCodeEditor
 {
     Q_OBJECT
 public:
@@ -15,8 +16,8 @@ public:
 protected:
     void mouseMoveEvent(QMouseEvent* event);
 
-private:
-    AsmHighlighter* m_highlighter;
+    //private:
+    //    AsmHighlighter* m_highlighter;
 };
 
 #endif // ASMTEXTEDIT_H

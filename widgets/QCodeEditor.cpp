@@ -617,3 +617,8 @@ int QCodeEditor::getIndentationSpaces()
 
     return indentationLevel;
 }
+
+QSourceHighlite::QSourceHighliter *QCodeEditor::getHighlighter() const
+{
+    return m_highlighter;
+}

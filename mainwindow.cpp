@@ -17,7 +17,6 @@ MainWindow::MainWindow(QWidget* parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->asmTextEdit->setReadOnly(true);
 
     initConnections();
     split = new QSplitter();
@@ -169,7 +168,6 @@ void MainWindow::on_compileButton_clicked()
     //    qDebug() << data.toJson(QJsonDocument::JsonFormat::Compact);
 
     QString endpoint = "compiler/" + ui->compilerComboBox->currentData().toString() + "/compile";
-    //    QString endpoint = "compiler/" + QString("g63") + "/compile";
     CompileSvc::instance()->compileRequest(endpoint, data.toJson());
 }
 

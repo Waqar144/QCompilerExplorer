@@ -83,6 +83,8 @@ public:
     bool autoIndentation() const;
 
     void initCodeLangs();
+    QSourceHighlite::QSourceHighliter* getHighlighter() const;
+
 public Q_SLOTS:
 
     /**
