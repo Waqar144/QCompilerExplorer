@@ -11,7 +11,6 @@
 
 AsmTextEdit::AsmTextEdit(QWidget* parent)
     : QCodeEditor { parent }
-//    , m_highlighter { new AsmHighlighter { document() } }
 {
     setMouseTracking(true);
 
@@ -37,6 +36,7 @@ void AsmTextEdit::mouseMoveEvent(QMouseEvent* event)
     QTextCursor tc = cursorForPosition(event->pos());
     tc.select(QTextCursor::WordUnderCursor);
     QString strWord = tc.selectedText();
+    if (strWord.isEmpty()) return;
     auto gpos = mapToGlobal(event->pos());
 
     QNetworkReply* reply = CompileSvc::instance()->tooltipRequest(strWord);

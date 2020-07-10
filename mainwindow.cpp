@@ -7,8 +7,10 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QProcess>
 #include <QSettings>
 #include <QSplitter>
+#include <QTemporaryFile>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -88,6 +90,7 @@ void MainWindow::initConnections()
     connect(CompileSvc::instance(), &CompileSvc::languages, this, &MainWindow::setupLanguages);
     connect(CompileSvc::instance(), &CompileSvc::compilers, this, &MainWindow::updateCompilerComboBox);
     connect(CompileSvc::instance(), &CompileSvc::asmResult, this, &MainWindow::updateAsmTextEdit);
+
     connect(ui->actionSettings, &QAction::triggered, this, &MainWindow::openSettingsDialog);
 }
 
@@ -101,7 +104,6 @@ QJsonDocument MainWindow::getCompilationOptions(const QString& source, const QSt
     QJsonObject compilerObj;
     compilerObj["skipAsm"] = false;
     compilerObj["executorRequest"] = false;
-    //    compilerOptions = compilerObj;
 
     //add compileropts to opt obj
     optObj["compilerOptions"] = compilerObj;
@@ -143,6 +145,10 @@ void MainWindow::on_compileButton_clicked()
 {
     if (ui->codeTextEdit->toPlainText().isEmpty())
         return;
+    if (ui->localCheckbox->isChecked()) {
+        on_compileButtonPress();
+        return;
+    }
     const QString text = ui->codeTextEdit->toPlainText();
     const QString args = ui->argsLineEdit->text();
     bool isIntel = ui->isIntelSyntax->isChecked();
@@ -179,4 +185,35 @@ void MainWindow::on_compilerComboBox_currentIndexChanged(const QString& arg1)
 {
     QSettings settings;
     settings.setValue("lastUsedCompilerFor" + ui->languagesComboBox->currentText(), arg1);
+}
+
+void MainWindow::on_compileButtonPress()
+{
+    if (!ui->localCheckbox->isChecked())
+        return;
+
+    QString source = ui->codeTextEdit->toPlainText();
+    QFile f("./x.cpp");
+    if (f.open(QFile::ReadWrite)) {
+        f.write(source.toUtf8());
+    }
+
+    qDebug () << "Starting";
+    QProcess p;
+    p.setProgram("g++");
+    p.setArguments({"-O3", "-S", "x.cpp"});
+    p.start();
+    if (p.waitForFinished()) {
+        //        return;
+
+        qDebug () << "End; " <<  p.exitStatus();
+
+        QFile file("./x.s");
+        if (file.open(QFile::ReadOnly)) {
+            auto all = file.readAll();
+            ui->asmTextEdit->setPlainText(all);
+        } else {
+            qDebug () << "failed to open x.s";
+        }
+    }
 }
