@@ -18,8 +18,6 @@ AsmTextEdit::AsmTextEdit(QWidget* parent)
 
     getHighlighter()->setCurrentLanguage(QSourceHighlite::QSourceHighliter::Language::CodeAsm);
 
-    setReadOnly(false);
-
     QSettings settings;
     QString fontSetting = settings.value("font").toString();
     QFont font = fontSetting.isEmpty() ? QFontDatabase::systemFont(QFontDatabase::FixedFont) : fontSetting;
@@ -30,7 +28,7 @@ AsmTextEdit::AsmTextEdit(QWidget* parent)
     setTabStopDistance(4 * QFontMetrics(font).horizontalAdvance(' '));
 
     //set background
-    setStyleSheet("background-color: #272822; color: #e3e2d6;");
+    setStyleSheet("background-color: #272822;");
 }
 
 void AsmTextEdit::setText(QString text)
@@ -79,4 +77,5 @@ void AsmTextEdit::mouseMoveEvent(QMouseEvent* event)
         QString tooltip = value;
         QToolTip::showText(gpos, value, this);
     });
+    return QCodeEditor::mouseMoveEvent(event);
 }
