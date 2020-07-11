@@ -43,7 +43,7 @@ void AsmTextEdit::setText(QString text)
         next = text.indexOf("_Z", last);
         //get token
         if (next != -1) {
-            int token = text.indexOf(QRegExp("@|\\[\\s|\\n"), next + 1);
+            int token = text.indexOf(QRegExp(":|,|@|\\[\\s|\\n"), next + 1);
             int len = token - next;
             QStringRef tok = text.midRef(next, len);
             qDebug () << "Current token: " << tok;

@@ -194,26 +194,32 @@ void MainWindow::on_compileButtonPress()
     if (!ui->localCheckbox->isChecked())
         return;
 
-    QString source = ui->codeTextEdit->toPlainText();
+    const QString source = ui->codeTextEdit->toPlainText();
+
     QFile f("./x.cpp");
-    if (f.open(QFile::ReadWrite)) {
+    if (f.open(QFile::ReadWrite | QFile::Truncate | QFile::Unbuffered)) {
         f.write(source.toUtf8());
-        //wait till everything is written
-//        if (!f.waitForBytesWritten(2000))
-////            return;
-//        qDebug () << f.errorString();
-//        return;
+        bool res = f.waitForBytesWritten(3000);
+        qDebug () << "Res: " << res;
     }
 
     qDebug () << "Starting";
     QProcess p;
     p.setProgram("g++");
-    p.setArguments({"-O3", "-S", "-masm=intel", "x.cpp"});
+    p.setArguments({"-O3", "-S", "-masm=intel",
+                    "-fno-asynchronous-unwind-tables",
+                    "-fno-dwarf2-cfi-asm",
+                    "x.cpp"});
     p.start();
     if (!p.waitForFinished())
         return;
 
     qDebug () << "End; " <<  p.exitStatus();
+    const QString error = p.readAllStandardError();
+    if (!error.isEmpty()) {
+        ui->asmTextEdit->setPlainText("<compilation failed>\n" + error);
+        return;
+    }
 
     QFile file("./x.s");
     if (file.open(QFile::ReadOnly)) {
