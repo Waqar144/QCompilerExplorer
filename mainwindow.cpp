@@ -3,10 +3,12 @@
 
 #include "compilerservice.h"
 #include "settingsdialog.h"
+#include "asmparser.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMessageBox>
 #include <QProcess>
 #include <QSettings>
 #include <QSplitter>
@@ -211,11 +213,14 @@ void MainWindow::on_compileButtonPress()
                     "-fno-dwarf2-cfi-asm",
                     "x.cpp"});
     p.start();
-    if (!p.waitForFinished())
+    if (!p.waitForFinished()) {
+        qDebug () << "Exit status: " <<  p.exitStatus();
+        qDebug () << "Error: " << p.readAllStandardError();
         return;
+    }
 
-    qDebug () << "End; " <<  p.exitStatus();
     const QString error = p.readAllStandardError();
+
     if (!error.isEmpty()) {
         ui->asmTextEdit->setPlainText("<compilation failed>\n" + error);
         return;
@@ -224,7 +229,9 @@ void MainWindow::on_compileButtonPress()
     QFile file("./x.s");
     if (file.open(QFile::ReadOnly)) {
         auto all = file.readAll();
-        ui->asmTextEdit->setText(all);
+        AsmParser p;
+        auto cleanAsm = p.process(all);
+        ui->asmTextEdit->setText(cleanAsm);
     } else {
         qDebug () << "failed to open x.s";
     }
