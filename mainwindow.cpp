@@ -12,6 +12,8 @@
 #include <QSplitter>
 #include <QTemporaryFile>
 
+#include <cxxabi.h>
+
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -196,24 +198,28 @@ void MainWindow::on_compileButtonPress()
     QFile f("./x.cpp");
     if (f.open(QFile::ReadWrite)) {
         f.write(source.toUtf8());
+        //wait till everything is written
+//        if (!f.waitForBytesWritten(2000))
+////            return;
+//        qDebug () << f.errorString();
+//        return;
     }
 
     qDebug () << "Starting";
     QProcess p;
     p.setProgram("g++");
-    p.setArguments({"-O3", "-S", "x.cpp"});
+    p.setArguments({"-O3", "-S", "-masm=intel", "x.cpp"});
     p.start();
-    if (p.waitForFinished()) {
-        //        return;
+    if (!p.waitForFinished())
+        return;
 
-        qDebug () << "End; " <<  p.exitStatus();
+    qDebug () << "End; " <<  p.exitStatus();
 
-        QFile file("./x.s");
-        if (file.open(QFile::ReadOnly)) {
-            auto all = file.readAll();
-            ui->asmTextEdit->setPlainText(all);
-        } else {
-            qDebug () << "failed to open x.s";
-        }
+    QFile file("./x.s");
+    if (file.open(QFile::ReadOnly)) {
+        auto all = file.readAll();
+        ui->asmTextEdit->setText(all);
+    } else {
+        qDebug () << "failed to open x.s";
     }
 }
