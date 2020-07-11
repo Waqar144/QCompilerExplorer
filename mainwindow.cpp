@@ -208,10 +208,22 @@ void MainWindow::on_compileButtonPress()
     qDebug () << "Starting";
     QProcess p;
     p.setProgram("g++");
-    p.setArguments({"-O3", "-S", "-masm=intel",
-                    "-fno-asynchronous-unwind-tables",
-                    "-fno-dwarf2-cfi-asm",
-                    "x.cpp"});
+
+    QString args = ui->argsLineEdit->text();
+    QStringList argsList;
+    if (!args.isEmpty())
+        argsList = args.split(QLatin1Char(' '));
+
+    argsList.append(QStringLiteral("-S"));
+    if (ui->isIntelSyntax->isChecked()) {
+        argsList.append(QStringLiteral("-masm=intel"));;
+    }
+    argsList.append({"-fno-asynchronous-unwind-tables",
+                     "-fno-dwarf2-cfi-asm",
+                     "./x.cpp"});
+
+    qDebug () << argsList;
+    p.setArguments(argsList);
     p.start();
     if (!p.waitForFinished()) {
         qDebug () << "Exit status: " <<  p.exitStatus();
@@ -222,6 +234,7 @@ void MainWindow::on_compileButtonPress()
     const QString error = p.readAllStandardError();
 
     if (!error.isEmpty()) {
+        qDebug () << error;
         ui->asmTextEdit->setPlainText("<compilation failed>\n" + error);
         return;
     }
@@ -231,7 +244,7 @@ void MainWindow::on_compileButtonPress()
         auto all = file.readAll();
         AsmParser p;
         auto cleanAsm = p.process(all);
-        ui->asmTextEdit->setText(cleanAsm);
+        ui->asmTextEdit->setText(all);
     } else {
         qDebug () << "failed to open x.s";
     }
