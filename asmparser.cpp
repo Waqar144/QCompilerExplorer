@@ -84,6 +84,7 @@ QString AsmParser::process(const QByteArray &asmText)
                 continue;
         }
 
+        line.replace("\t", "\t\t");
         output += line + "\n";
     }
 
