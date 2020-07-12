@@ -11,7 +11,6 @@ class AsmTextEdit : public QCodeEditor
     Q_OBJECT
 public:
     AsmTextEdit(QWidget* parent = nullptr);
-
     // QWidget interface
 protected:
     void mouseMoveEvent(QMouseEvent* event);

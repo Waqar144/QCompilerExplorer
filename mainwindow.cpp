@@ -3,12 +3,18 @@
 
 #include "compilerservice.h"
 #include "settingsdialog.h"
+#include "asmparser.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMessageBox>
+#include <QProcess>
 #include <QSettings>
 #include <QSplitter>
+#include <QTemporaryFile>
+
+#include <cxxabi.h>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -88,6 +94,7 @@ void MainWindow::initConnections()
     connect(CompileSvc::instance(), &CompileSvc::languages, this, &MainWindow::setupLanguages);
     connect(CompileSvc::instance(), &CompileSvc::compilers, this, &MainWindow::updateCompilerComboBox);
     connect(CompileSvc::instance(), &CompileSvc::asmResult, this, &MainWindow::updateAsmTextEdit);
+
     connect(ui->actionSettings, &QAction::triggered, this, &MainWindow::openSettingsDialog);
 }
 
@@ -101,7 +108,6 @@ QJsonDocument MainWindow::getCompilationOptions(const QString& source, const QSt
     QJsonObject compilerObj;
     compilerObj["skipAsm"] = false;
     compilerObj["executorRequest"] = false;
-    //    compilerOptions = compilerObj;
 
     //add compileropts to opt obj
     optObj["compilerOptions"] = compilerObj;
@@ -143,6 +149,10 @@ void MainWindow::on_compileButton_clicked()
 {
     if (ui->codeTextEdit->toPlainText().isEmpty())
         return;
+    if (ui->localCheckbox->isChecked()) {
+        on_compileButtonPress();
+        return;
+    }
     const QString text = ui->codeTextEdit->toPlainText();
     const QString args = ui->argsLineEdit->text();
     bool isIntel = ui->isIntelSyntax->isChecked();
@@ -179,4 +189,67 @@ void MainWindow::on_compilerComboBox_currentIndexChanged(const QString& arg1)
 {
     QSettings settings;
     settings.setValue("lastUsedCompilerFor" + ui->languagesComboBox->currentText(), arg1);
+}
+
+void MainWindow::on_compileButtonPress()
+{
+    if (!ui->localCheckbox->isChecked())
+        return;
+
+    const QString source = ui->codeTextEdit->toPlainText();
+
+    QFile f("./x.cpp");
+    if (f.open(QFile::ReadWrite | QFile::Truncate | QFile::Unbuffered)) {
+        f.write(source.toUtf8());
+        bool res = f.waitForBytesWritten(3000);
+        qDebug () << "Res: " << res;
+    }
+
+    qDebug () << "Starting";
+    QProcess p;
+    p.setProgram("g++");
+
+    QString args = ui->argsLineEdit->text();
+    QStringList argsList;
+    if (!args.isEmpty())
+        argsList = args.split(QLatin1Char(' '));
+
+    argsList.append(QStringLiteral("-S"));
+    if (ui->isIntelSyntax->isChecked()) {
+        argsList.append(QStringLiteral("-masm=intel"));;
+    }
+    argsList.append({"-fno-asynchronous-unwind-tables",
+                     "-fno-dwarf2-cfi-asm",
+                     "./x.cpp"});
+
+    qDebug () << argsList;
+    p.setArguments(argsList);
+    p.start();
+    if (!p.waitForFinished()) {
+        qDebug () << "Exit status: " <<  p.exitStatus();
+        qDebug () << "Error: " << p.readAllStandardError();
+        return;
+    }
+
+    const QString error = p.readAllStandardError();
+
+    if (!error.isEmpty()) {
+        qDebug () << error;
+        qDebug () << p.error();
+        if (error.contains("error:")) {
+            ui->asmTextEdit->setPlainText("<compilation failed>\n" + error);
+            return;
+        }
+    }
+
+    QFile file("./x.s");
+    if (file.open(QFile::ReadOnly)) {
+        auto all = file.readAll();
+        AsmParser p;
+        QString demangled = p.demangle(std::move(all));
+        QString cleanAsm = p.process(demangled.toUtf8());
+        ui->asmTextEdit->setPlainText(cleanAsm);
+    } else {
+        qDebug () << "failed to open x.s";
+    }
 }

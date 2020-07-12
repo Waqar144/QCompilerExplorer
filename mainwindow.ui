@@ -53,6 +53,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="localCheckbox">
+            <property name="text">
+             <string>Local</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="compileButton">
             <property name="text">
              <string>Compile</string>
@@ -79,7 +86,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSettings">

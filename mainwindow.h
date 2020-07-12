@@ -29,6 +29,7 @@ private slots:
     void on_compileButton_clicked();
     void openSettingsDialog();
     void on_compilerComboBox_currentIndexChanged(const QString& arg1);
+    void on_compileButtonPress();
 
 private:
     void initConnections();

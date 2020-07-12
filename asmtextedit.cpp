@@ -11,13 +11,10 @@
 
 AsmTextEdit::AsmTextEdit(QWidget* parent)
     : QCodeEditor { parent }
-//    , m_highlighter { new AsmHighlighter { document() } }
 {
     setMouseTracking(true);
 
     getHighlighter()->setCurrentLanguage(QSourceHighlite::QSourceHighliter::Language::CodeAsm);
-
-    setReadOnly(false);
 
     QSettings settings;
     QString fontSetting = settings.value("font").toString();
@@ -29,7 +26,7 @@ AsmTextEdit::AsmTextEdit(QWidget* parent)
     setTabStopDistance(4 * QFontMetrics(font).horizontalAdvance(' '));
 
     //set background
-    setStyleSheet("background-color: #272822; color: #e3e2d6;");
+    setStyleSheet("background-color: #272822;");
 }
 
 void AsmTextEdit::mouseMoveEvent(QMouseEvent* event)
@@ -37,6 +34,7 @@ void AsmTextEdit::mouseMoveEvent(QMouseEvent* event)
     QTextCursor tc = cursorForPosition(event->pos());
     tc.select(QTextCursor::WordUnderCursor);
     QString strWord = tc.selectedText();
+    if (strWord.isEmpty()) return;
     auto gpos = mapToGlobal(event->pos());
 
     QNetworkReply* reply = CompileSvc::instance()->tooltipRequest(strWord);
@@ -47,4 +45,5 @@ void AsmTextEdit::mouseMoveEvent(QMouseEvent* event)
         QString tooltip = value;
         QToolTip::showText(gpos, value, this);
     });
+    return QCodeEditor::mouseMoveEvent(event);
 }
