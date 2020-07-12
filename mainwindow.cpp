@@ -246,9 +246,9 @@ void MainWindow::on_compileButtonPress()
     if (file.open(QFile::ReadOnly)) {
         auto all = file.readAll();
         AsmParser p;
-        QString cleanAsm = p.process(all);
-        QString demangled = p.demangle(std::move(cleanAsm));
-        ui->asmTextEdit->setPlainText(demangled);
+        QString demangled = p.demangle(std::move(all));
+        QString cleanAsm = p.process(demangled.toUtf8());
+        ui->asmTextEdit->setPlainText(cleanAsm);
     } else {
         qDebug () << "failed to open x.s";
     }
