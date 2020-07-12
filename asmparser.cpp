@@ -17,13 +17,6 @@ QString AsmParser::process(const QByteArray &asmText)
     output.reserve(asmText.length());
     QTextStream s(asmText);
 
-//    //skip first 6 lines
-//    for (int i = 0; i < 6 && !s.atEnd(); ++i)
-//        s.readLine();
-
-    int LFEcount = 0;
-    bool isLFEBlock = false;
-
     //1. collect all the labels
     //2. go through the asm line by line and check if the labels are used/unused
     //3. if the labels are unused, they get deleted
@@ -31,32 +24,67 @@ QString AsmParser::process(const QByteArray &asmText)
 
     QRegularExpression exp{"^\\s*[_|a-zA-Z]"};
 
+    QRegularExpression directiveRe{"^\\s*\\..*$"};
+    QRegularExpression labelRe{"^\\.*[a-zA-Z]+[0-9]+:$"};
+    QRegularExpression hasOpcodeRe{"^\\s*[a-zA-Z]"};
+
+    //<label, used>
+    QHash<QString, bool> labels;
+
+    //1
     while (!s.atEnd()) {
         QString line = s.readLine();
-//        auto match = exp.match(line);
-//        if (match.hasMatch()) {
-            output.append(line + "\n");
-//        }
-//        bool isLFBDirective = line.startsWith(QLatin1String(".LFB"));
-//        bool isLFEDirective = line.startsWith(QLatin1String(".LFE"));
+        if (labelRe.match(line).hasMatch()) {
+            auto label = line.trimmed();
+            label.chop(1); // remove ':'
+            labels[label] = false;
+        }
+    }
 
-//        if (isLFEDirective) {
-//            isLFEBlock = true;
-//        }
+    s.seek(0);
 
-//        if (isLFEBlock) {
-//            LFEcount++;
-//            if (LFEcount == 4) {
-//                isLFEBlock = false;
-//            }
-//            continue;
-//        }
+    //2
+    while(!s.atEnd()) {
+        QString line = s.readLine();
+        if (hasOpcodeRe.match(line).hasMatch()) {
+            QHashIterator<QString, bool> i(labels);
+            while (i.hasNext()) {
+                auto label = i.next();
+                if (line.contains(label.key())) {
+                    labels[label.key()] = true;
+                }
+            }
+        }
+    }
 
-//        if (!isLFBDirective && !isLFEDirective && !isLFEBlock) {
-//            if (line.startsWith(".LFB"))
-//                qDebug () << line;
-//            output.append(line + "\n");
-//        }
+    //remove false labels from labels hash-map
+    auto labelsCopy = labels;
+    auto it = labelsCopy.constBegin();
+    for (; it != labelsCopy.constEnd(); ++it) {
+        if ( it.value() == false ) {
+            labels.remove(it.key());
+        }
+    }
+
+    s.seek(0);
+
+    //3
+    while(!s.atEnd()) {
+        QString line = s.readLine();
+        if (labelRe.match(line).hasMatch()) {
+            auto l = line.trimmed();
+            l.chop(1);
+            if (labels.contains(l)) {
+                output += line + "\n";
+            }
+            continue;
+        }
+
+        if (directiveRe.match(line).hasMatch()) {
+                continue;
+        }
+
+        output += line + "\n";
     }
 
     return output;
