@@ -6,11 +6,6 @@
 
 #include <cxxabi.h>
 
-AsmParser::AsmParser()
-{
-
-}
-
 QString AsmParser::process(const QByteArray &asmText)
 {
     QString output;

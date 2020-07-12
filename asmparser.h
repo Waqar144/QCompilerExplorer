@@ -6,7 +6,7 @@
 class AsmParser
 {
 public:
-    AsmParser();
+    AsmParser() = default;
     QString process(const QByteArray& asmText);
     QString demangle(QString&& asmText);
 };
