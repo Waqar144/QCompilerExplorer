@@ -9,8 +9,6 @@
 #include <qjsondocument.h>
 #include <qsettings.h>
 
-#include <cxxabi.h>
-
 AsmTextEdit::AsmTextEdit(QWidget* parent)
     : QCodeEditor { parent }
 {
@@ -29,36 +27,6 @@ AsmTextEdit::AsmTextEdit(QWidget* parent)
 
     //set background
     setStyleSheet("background-color: #272822;");
-}
-
-void AsmTextEdit::setText(QString text)
-{
-    //look for _Z
-
-    int next = 0;
-    int last = 0;
-    while (next != -1) {
-        next = text.indexOf("_Z", last);
-        //get token
-        if (next != -1) {
-            int token = text.indexOf(QRegExp(":|,|@|\\[\\s|\\n"), next + 1);
-            int len = token - next;
-            QStringRef tok = text.midRef(next, len);
-            qDebug () << "Current token: " << tok;
-            int status = 0;
-            char* name = abi::__cxa_demangle(tok.toUtf8().constData(), 0, 0, &status);
-            if (status != 0) {
-                qDebug () << "Demangling of: " << tok << " failed, status: " << status;
-            }
-            QString qName{name};
-            qName.prepend(' ');
-            qDebug () << qName;
-            text.replace(next, len, qName);
-            free((void*)name);
-        }
-    }
-
-    setPlainText(text);
 }
 
 void AsmTextEdit::mouseMoveEvent(QMouseEvent* event)

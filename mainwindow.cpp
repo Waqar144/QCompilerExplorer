@@ -235,16 +235,20 @@ void MainWindow::on_compileButtonPress()
 
     if (!error.isEmpty()) {
         qDebug () << error;
-        ui->asmTextEdit->setPlainText("<compilation failed>\n" + error);
-        return;
+        qDebug () << p.error();
+        if (error.contains("error:")) {
+            ui->asmTextEdit->setPlainText("<compilation failed>\n" + error);
+            return;
+        }
     }
 
     QFile file("./x.s");
     if (file.open(QFile::ReadOnly)) {
         auto all = file.readAll();
         AsmParser p;
-        auto cleanAsm = p.process(all);
-        ui->asmTextEdit->setText(all);
+        QString cleanAsm = p.process(all);
+        QString demangled = p.demangle(std::move(cleanAsm));
+        ui->asmTextEdit->setPlainText(demangled);
     } else {
         qDebug () << "failed to open x.s";
     }
