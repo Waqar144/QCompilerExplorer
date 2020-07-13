@@ -22,6 +22,7 @@ QString AsmParser::process(const QByteArray &asmText)
     QRegularExpression directiveRe{"^\\s*\\..*$"};
     QRegularExpression labelRe{"^\\.*[a-zA-Z]+[0-9]+:$"};
     QRegularExpression hasOpcodeRe{"^\\s*[a-zA-Z]"};
+    QRegularExpression numericLabelsRe { "\\s*[0-9]:" };
 
     //<label, used>
     QHash<QString, bool> labels;
@@ -66,6 +67,7 @@ QString AsmParser::process(const QByteArray &asmText)
     //3
     while(!s.atEnd()) {
         QString line = s.readLine();
+
         if (labelRe.match(line).hasMatch()) {
             auto l = line.trimmed();
             l.chop(1);
@@ -76,7 +78,11 @@ QString AsmParser::process(const QByteArray &asmText)
         }
 
         if (directiveRe.match(line).hasMatch()) {
-                continue;
+            continue;
+        }
+
+        if (numericLabelsRe.match(line).hasMatch()) {
+            continue;
         }
 
         line.replace("\t", "\t\t");
