@@ -1,0 +1,28 @@
+name: 'build'
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/
+        qt-version: ['5.13.2', '5.14.2', '5.15.0']
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    # https://github.com/marketplace/actions/install-qt
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: ${{ matrix.qt-version }}
+    - name: qmake & make
+      run: |
+        qmake qcompilerexplorer.pro
+        make
