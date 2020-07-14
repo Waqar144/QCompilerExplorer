@@ -21,10 +21,13 @@ jobs:
     # https://github.com/marketplace/actions/install-qt
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
+      if: contains( matrix.os, 'windows')
       with:
         version: ${{ matrix.qt-version }}
-      if: contains( matrix.os, 'windows')
         arch: win64_mingw53
+      if: !contains( matrix.os, 'windows')
+      with:
+        version: ${{ matrix.qt-version }}
     - name: qmake & make
       run: |
         qmake qcompilerexplorer.pro
