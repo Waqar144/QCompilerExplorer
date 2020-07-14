@@ -6,6 +6,23 @@ Just made this as a fun project. It includes a local mini compiler explorer, whi
 
 ![screenshot](screenshots/screenshot.png)
 
+## Building QCompilerExplorer
+
+```shell
+git clone https://github.com/Waqar144/QCompilerExplorer.git
+cd QCompilerExplorer
+git submodule update --init
+```
+
+Then download [Qt Creator](http://www.qt.io/download-open-source), open the
+project file `qcompilerexplorer.pro` and click on *Build / Run*.
+
+Or you can build it directly in your terminal:
+
+```shell
+qmake qcompilerexplorer.pro
+make
+```
 
 ## Missing stuff
 
