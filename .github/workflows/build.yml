@@ -10,6 +10,7 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         # https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/
@@ -19,13 +20,15 @@ jobs:
       with:
         submodules: true
     # https://github.com/marketplace/actions/install-qt
-    - name: Install Qt
+    - if: contains( matrix.os, 'windows')
+      name: Install Qt on Windows
       uses: jurplel/install-qt-action@v2
-      if: contains( matrix.os, 'windows')
       with:
         version: ${{ matrix.qt-version }}
         arch: win64_mingw53
-      if: !contains( matrix.os, 'windows')
+    - if: !contains( matrix.os, 'windows')
+      name: Install Qt
+      uses: jurplel/install-qt-action@v2
       with:
         version: ${{ matrix.qt-version }}
     - name: qmake & make
