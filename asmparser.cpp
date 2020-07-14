@@ -85,6 +85,10 @@ QString AsmParser::process(const QByteArray &asmText)
             continue;
         }
 
+        if (line.trimmed() == "endbr64") {
+            continue;
+        }
+
         line.replace("\t", "\t\t");
         output += line + "\n";
     }
@@ -100,8 +104,8 @@ QString AsmParser::demangle(QString &&asmText)
         next = asmText.indexOf("_Z", last);
         //get token
         if (next != -1) {
-            int token = asmText.indexOf(QRegularExpression(":|,|@|\\[|\\s|\\n"), next + 1);
-            int len = token - next;
+            int tokenEnd = asmText.indexOf(QRegularExpression(":|,|@|\\[|\\s|\\n"), next + 1);
+            int len = tokenEnd - next;
             QStringRef tok = asmText.midRef(next, len);
             int status = 0;
             char* name = abi::__cxa_demangle(tok.toUtf8().constData(), 0, 0, &status);
