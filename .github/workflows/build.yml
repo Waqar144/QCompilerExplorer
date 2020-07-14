@@ -23,6 +23,9 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         version: ${{ matrix.qt-version }}
+      if: contains( matrix.os, 'windows')
+      with:
+        arch: win64_mingw53
     - name: qmake & make
       run: |
         qmake qcompilerexplorer.pro
