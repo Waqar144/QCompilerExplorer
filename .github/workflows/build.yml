@@ -25,7 +25,7 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         version: ${{ matrix.qt-version }}
-        arch: win64_mingw53
+        arch: win64_mingw73
     - if: false == contains( matrix.os, 'windows')
       name: Install Qt
       uses: jurplel/install-qt-action@v2
