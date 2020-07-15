@@ -6,6 +6,12 @@
 
 #include <cxxabi.h>
 
+static bool isOpcodeLen4orMore(const QString& line)
+{
+    int pos = line.indexOf(QLatin1Char('\t'));
+    return pos > 3;
+}
+
 QString AsmParser::process(const QByteArray &asmText)
 {
     QString output;
@@ -17,12 +23,12 @@ QString AsmParser::process(const QByteArray &asmText)
     //3. if the labels are unused, they get deleted
     //4. every line beginning with '.' gets deleted, unless it is a used label
 
-    QRegularExpression exp{"^\\s*[_|a-zA-Z]"};
+    QRegularExpression exp { QStringLiteral("^\\s*[_|a-zA-Z]") };
 
-    QRegularExpression directiveRe{"^\\s*\\..*$"};
-    QRegularExpression labelRe{"^\\.*[a-zA-Z]+[0-9]+:$"};
-    QRegularExpression hasOpcodeRe{"^\\s*[a-zA-Z]"};
-    QRegularExpression numericLabelsRe { "\\s*[0-9]:" };
+    QRegularExpression directiveRe { QStringLiteral("^\\s*\\..*$") };
+    QRegularExpression labelRe { QStringLiteral("^\\.*[a-zA-Z]+[0-9]+:$") };
+    QRegularExpression hasOpcodeRe { QStringLiteral("^\\s*[a-zA-Z]") };
+    QRegularExpression numericLabelsRe { QStringLiteral("\\s*[0-9]:") };
 
     //<label, used>
     QHash<QString, bool> labels;
@@ -66,10 +72,10 @@ QString AsmParser::process(const QByteArray &asmText)
 
     //3
     while(!s.atEnd()) {
-        QString line = s.readLine();
+        QString line = s.readLine().trimmed();
 
         if (labelRe.match(line).hasMatch()) {
-            auto l = line.trimmed();
+            auto l = line;
             l.chop(1);
             if (labels.contains(l)) {
                 output += line + "\n";
@@ -85,12 +91,20 @@ QString AsmParser::process(const QByteArray &asmText)
             continue;
         }
 
-        if (line.trimmed() == "endbr64") {
+        if (line == QLatin1String("endbr64")) {
             continue;
         }
 
-        line.replace("\t", "\t\t");
-        output += line + "\n";
+        if (line.endsWith(QLatin1Char(':'))) {
+            output += line + '\n';
+            continue;
+        }
+
+        if (!isOpcodeLen4orMore(line))
+            line.replace(QLatin1Char('\t'), QStringLiteral("\t\t"));
+        line.prepend(QLatin1Char('\t')).append('\n');
+
+        output += line;
     }
 
     return output;
@@ -100,11 +114,12 @@ QString AsmParser::demangle(QString &&asmText)
 {
     int next = 0;
     int last = 0;
+    QRegularExpression nameEndRe { QStringLiteral(":|,|@|\\[|\\s|\\n") };
     while (next != -1) {
-        next = asmText.indexOf("_Z", last);
+        next = asmText.indexOf(QLatin1String("_Z"), last);
         //get token
         if (next != -1) {
-            int tokenEnd = asmText.indexOf(QRegularExpression(":|,|@|\\[|\\s|\\n"), next + 1);
+            int tokenEnd = asmText.indexOf(nameEndRe, next + 1);
             int len = tokenEnd - next;
             QStringRef tok = asmText.midRef(next, len);
             int status = 0;
