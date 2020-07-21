@@ -9,7 +9,13 @@
 static bool isOpcodeLen4orMore(const QString& line)
 {
     int pos = line.indexOf(QLatin1Char('\t'));
-    return pos > 3;
+    return pos > 4;
+}
+
+static int opcodeLen(const QString& line)
+{
+    int tabPos = line.indexOf(QLatin1Char('\t'));
+    return tabPos;
 }
 
 QString AsmParser::process(const QByteArray &asmText)
@@ -70,6 +76,8 @@ QString AsmParser::process(const QByteArray &asmText)
 
     s.seek(0);
 
+    int maxOpcodeLen = 4;
+
     //3
     while(!s.atEnd()) {
         QString line = s.readLine().trimmed();
@@ -100,11 +108,38 @@ QString AsmParser::process(const QByteArray &asmText)
             continue;
         }
 
-        if (!isOpcodeLen4orMore(line))
-            line.replace(QLatin1Char('\t'), QStringLiteral("\t\t"));
-        line.prepend(QLatin1Char('\t')).append('\n');
+        auto len = opcodeLen(line);
+        if (len > maxOpcodeLen)
+            maxOpcodeLen = len;
+
+        line.append('\n');
 
         output += line;
+    }
+
+    QTextStream finalOut(output.toUtf8());
+    output.clear();
+    while(!finalOut.atEnd()) {
+        QString line = finalOut.readLine();
+
+        //no indentation if it is a label
+        if (line.endsWith(':') || line.contains(':')) {
+            output.append(line).append('\n');
+            continue;
+        }
+
+        if (maxOpcodeLen == 4) {
+            line.replace(QLatin1Char('\t'), QStringLiteral("\t\t"));
+        } else if (maxOpcodeLen > 4 && maxOpcodeLen < 8 && !isOpcodeLen4orMore(line)) {
+            line.replace(QLatin1Char('\t'), QStringLiteral("\t\t"));
+        } else if (maxOpcodeLen > 7 && opcodeLen(line) <= 4) {
+            line.replace(QLatin1Char('\t'), QStringLiteral("\t\t\t"));
+        } else if (maxOpcodeLen > 7 && opcodeLen(line) <= 7) {
+            line.replace(QLatin1Char('\t'), QStringLiteral("\t\t"));
+        }
+
+        line.prepend('\t').append('\n');
+        output.append(line);
     }
 
     return output;
