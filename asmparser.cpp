@@ -98,10 +98,8 @@ QString AsmParser::process(const QByteArray &asmText)
             auto l = line;
             l.chop(1);
             currentLabel = "";
-//            qDebug () << "EMPTYING" << line;
             if (labels.contains(l)) {
                 currentLabel = line;
-//                qDebug () << currentLabel;
                 output += line + "\n";
             }
             continue;
@@ -109,7 +107,6 @@ QString AsmParser::process(const QByteArray &asmText)
 
         if (directiveRe.match(line).hasMatch()) {
             //if we are in a label
-//            qDebug () << line;
             if (!currentLabel.isEmpty()) {
                 for (const auto& allowed : allowedDirectives) {
                     if (line.trimmed().startsWith(allowed))
@@ -174,14 +171,19 @@ QString AsmParser::demangle(QString &&asmText)
 {
     int next = 0;
     int last = 0;
-    QRegularExpression nameEndRe { QStringLiteral(":|,|@|\\[|\\s|\\n") };
+    QRegularExpression nameEndRe { QStringLiteral(":|,|@|\\[|]|\\s|\\n") };
     while (next != -1) {
         next = asmText.indexOf(QLatin1String("_Z"), last);
+
         //get token
         if (next != -1) {
             int tokenEnd = asmText.indexOf(nameEndRe, next + 1);
             int len = tokenEnd - next;
             QStringRef tok = asmText.midRef(next, len);
+            if (tok.contains('(')) {
+                int brackOpen = tok.indexOf('(');
+                tok = tok.mid(0, brackOpen);
+            }
             int status = 0;
             char* name = abi::__cxa_demangle(tok.toUtf8().constData(), 0, 0, &status);
             if (status != 0) {
