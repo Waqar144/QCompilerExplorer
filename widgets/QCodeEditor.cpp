@@ -169,8 +169,6 @@ void QCodeEditor::updateFont(const QString& fontName)
     font.setFixedPitch(true);
     setTabStopDistance(4 * QFontMetrics(font).horizontalAdvance(' '));
     setFont(font);
-    qDebug() << fontName;
-    //    setFontFamily(fontName);
 }
 
 void QCodeEditor::updateFontSize(qreal fontSize)
@@ -179,7 +177,7 @@ void QCodeEditor::updateFontSize(qreal fontSize)
     this->selectAll();
     QFont font = this->font();
     font.setPointSize(fontSize);
-    //    setFontPointSize(fontSize);
+
     font.setFixedPitch(true);
     setTabStopDistance(4 * QFontMetrics(font).horizontalAdvance(' '));
     setFont(font);

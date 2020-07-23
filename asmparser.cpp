@@ -36,6 +36,16 @@ QString AsmParser::process(const QByteArray &asmText)
     QRegularExpression hasOpcodeRe { QStringLiteral("^\\s*[a-zA-Z]") };
     QRegularExpression numericLabelsRe { QStringLiteral("\\s*[0-9]:") };
 
+    const QVector<QString> allowedDirectives =
+    {
+        ".string",
+        ".zero",
+        ".byte",
+        ".value",
+        ".long",
+        ".quad"
+    };
+
     //<label, used>
     QHash<QString, bool> labels;
 
@@ -78,6 +88,8 @@ QString AsmParser::process(const QByteArray &asmText)
 
     int maxOpcodeLen = 4;
 
+    QString currentLabel;
+
     //3
     while(!s.atEnd()) {
         QString line = s.readLine().trimmed();
@@ -85,13 +97,25 @@ QString AsmParser::process(const QByteArray &asmText)
         if (labelRe.match(line).hasMatch()) {
             auto l = line;
             l.chop(1);
+            currentLabel = "";
+//            qDebug () << "EMPTYING" << line;
             if (labels.contains(l)) {
+                currentLabel = line;
+//                qDebug () << currentLabel;
                 output += line + "\n";
             }
             continue;
         }
 
         if (directiveRe.match(line).hasMatch()) {
+            //if we are in a label
+//            qDebug () << line;
+            if (!currentLabel.isEmpty()) {
+                for (const auto& allowed : allowedDirectives) {
+                    if (line.trimmed().startsWith(allowed))
+                        output += line + "\n";
+                }
+            }
             continue;
         }
 
@@ -104,6 +128,7 @@ QString AsmParser::process(const QByteArray &asmText)
         }
 
         if (line.endsWith(QLatin1Char(':'))) {
+            currentLabel = line;
             output += line + '\n';
             continue;
         }
