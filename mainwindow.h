@@ -31,8 +31,11 @@ private slots:
     void on_compilerComboBox_currentIndexChanged(const QString& arg1);
     void on_compileButtonPress();
 
+    void on_localCheckbox_stateChanged(int arg1);
+
 private:
     void initConnections();
+    void loadLocalCompilers();
     QJsonDocument getCompilationOptions(const QString& source, const QString& userArgs, bool isIntel) const;
     /* Private Member Variables*/
 private:

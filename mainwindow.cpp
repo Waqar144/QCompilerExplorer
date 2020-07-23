@@ -35,7 +35,14 @@ MainWindow::MainWindow(QWidget* parent)
     restoreGeometry(settings.value("geometry").toByteArray());
     restoreState(settings.value("windowState").toByteArray());
 
-    CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
+    Qt::CheckState isLocal = static_cast<Qt::CheckState>(settings.value("localCE", true).toInt());
+    if (isLocal != Qt::Checked) {
+        CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
+    } else {
+        ui->localCheckbox->setCheckState(Qt::Checked);
+        ui->languagesComboBox->setDisabled(true);
+        loadLocalCompilers();
+    }
 }
 
 MainWindow::~MainWindow()
@@ -96,6 +103,37 @@ void MainWindow::initConnections()
     connect(CompileSvc::instance(), &CompileSvc::asmResult, this, &MainWindow::updateAsmTextEdit);
 
     connect(ui->actionSettings, &QAction::triggered, this, &MainWindow::openSettingsDialog);
+}
+
+static bool isCompilerAvailable(const QString& compiler)
+{
+    return QProcess::execute(compiler, {}) != -2;
+}
+
+static QString getCompilerVersion(const QString& compiler)
+{
+    QProcess p;
+    p.start(compiler, {"--version"});
+    if (!p.waitForFinished()) {
+        qDebug () << "Error: " << p.errorString();
+    }
+    QString result = p.readAllStandardOutput();
+    return result.split(QRegularExpression("\\s|\\n")).at(2);
+}
+
+void MainWindow::loadLocalCompilers()
+{
+    if (!ui->localCheckbox->isChecked())
+        return;
+    ui->compilerComboBox->clear();
+    if (isCompilerAvailable("g++")) {
+        const QString version = getCompilerVersion("g++");
+        ui->compilerComboBox->addItem("g++ " + version, "g++");
+    }
+    if (isCompilerAvailable("clang++")) {
+        const QString version = getCompilerVersion("clang++");
+        ui->compilerComboBox->addItem("clang++ " + version, "clang++");
+    }
 }
 
 QJsonDocument MainWindow::getCompilationOptions(const QString& source, const QString& userArgs, bool isIntel) const
@@ -188,7 +226,10 @@ void MainWindow::openSettingsDialog()
 void MainWindow::on_compilerComboBox_currentIndexChanged(const QString& arg1)
 {
     QSettings settings;
-    settings.setValue("lastUsedCompilerFor" + ui->languagesComboBox->currentText(), arg1);
+    int isLocal = settings.value("localCE").toInt();
+    if (isLocal != Qt::Checked) {
+        settings.setValue("lastUsedCompilerFor" + ui->languagesComboBox->currentText(), arg1);
+    }
 }
 
 void MainWindow::on_compileButtonPress()
@@ -207,7 +248,8 @@ void MainWindow::on_compileButtonPress()
 
     qDebug () << "Starting";
     QProcess p;
-    p.setProgram("g++");
+    auto compiler = ui->compilerComboBox->currentData().toString();
+    p.setProgram(compiler);
 
     QString args = ui->argsLineEdit->text();
     QStringList argsList;
@@ -251,5 +293,18 @@ void MainWindow::on_compileButtonPress()
         ui->asmTextEdit->setPlainText(cleanAsm);
     } else {
         qDebug () << "failed to open x.s";
+    }
+}
+
+void MainWindow::on_localCheckbox_stateChanged(int state)
+{
+    QSettings settings;
+    settings.setValue("localCE", state);
+    if (state == Qt::Checked) {
+        ui->languagesComboBox->setDisabled(true);
+        loadLocalCompilers();
+    } else {
+        ui->languagesComboBox->setDisabled(false);
+        CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
     }
 }
