@@ -177,6 +177,7 @@ QString AsmParser::demangle(QString &&asmText)
 
         //get token
         if (next != -1) {
+            last = next + 1;
             int tokenEnd = asmText.indexOf(nameEndRe, next + 1);
             int len = tokenEnd - next;
             QStringRef tok = asmText.midRef(next, len);
@@ -188,6 +189,7 @@ QString AsmParser::demangle(QString &&asmText)
             char* name = abi::__cxa_demangle(tok.toUtf8().constData(), 0, 0, &status);
             if (status != 0) {
                 qDebug () << "Demangling of: " << tok << " failed, status: " << status;
+                next = asmText.indexOf(QLatin1String("_Z"), last);
                 continue;
             }
             QString qName{name};
