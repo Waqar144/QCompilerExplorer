@@ -39,6 +39,7 @@ QString AsmParser::process(const QByteArray &asmText)
     const QVector<QString> allowedDirectives =
     {
         ".string",
+        ".ascii",
         ".zero",
         ".byte",
         ".value",
@@ -171,24 +172,26 @@ QString AsmParser::demangle(QString &&asmText)
 {
     int next = 0;
     int last = 0;
-    QRegularExpression nameEndRe { QStringLiteral(":|,|@|\\[|]|\\s|\\n") };
+
     while (next != -1) {
         next = asmText.indexOf(QLatin1String("_Z"), last);
 
         //get token
         if (next != -1) {
             last = next + 1;
-            int tokenEnd = asmText.indexOf(nameEndRe, next + 1);
-            int len = tokenEnd - next;
-            QStringRef tok = asmText.midRef(next, len);
-            if (tok.contains('(')) {
-                int brackOpen = tok.indexOf('(');
-                tok = tok.mid(0, brackOpen);
-            }
+
+            const auto it = std::find_if(asmText.cbegin() + last, asmText.cend(), [](const QChar c){
+                return c == ':' || c == ',' || c == '[' || c== '@' || c == '(' ||
+                        c == '+' || c == ' ' || c == '\n';
+            });
+            const int tokenEnd = std::distance(asmText.cbegin(), it);
+            const int len = tokenEnd - next;
+            const QStringRef tok = asmText.midRef(next, len);
+
             int status = 0;
             char* name = abi::__cxa_demangle(tok.toUtf8().constData(), 0, 0, &status);
             if (status != 0) {
-                qDebug () << "Demangling of: " << tok << " failed, status: " << status;
+                qWarning () << "Demangling of: " << tok << " failed, status: " << status;
                 next = asmText.indexOf(QLatin1String("_Z"), last);
                 continue;
             }
