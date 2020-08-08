@@ -95,12 +95,31 @@
     </property>
     <addaction name="actionSettings"/>
    </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionSave_asm_to_file"/>
+    <addaction name="actionSave_code_to_file"/>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionSettings">
    <property name="text">
     <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionSave_asm_to_file">
+   <property name="text">
+    <string>Save asm to file...</string>
+   </property>
+  </action>
+  <action name="actionSave_code_to_file">
+   <property name="text">
+    <string>Save code to file...</string>
    </property>
   </action>
  </widget>

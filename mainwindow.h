@@ -30,8 +30,8 @@ private slots:
     void openSettingsDialog();
     void on_compilerComboBox_currentIndexChanged(const QString& arg1);
     void on_compileButtonPress();
-
     void on_localCheckbox_stateChanged(int arg1);
+    void saveToFile();
 
 private:
     void initConnections();

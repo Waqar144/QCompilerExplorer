@@ -5,6 +5,7 @@
 #include "settingsdialog.h"
 #include "asmparser.h"
 
+#include <QFileDialog>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -101,8 +102,9 @@ void MainWindow::initConnections()
     connect(CompileSvc::instance(), &CompileSvc::languages, this, &MainWindow::setupLanguages);
     connect(CompileSvc::instance(), &CompileSvc::compilers, this, &MainWindow::updateCompilerComboBox);
     connect(CompileSvc::instance(), &CompileSvc::asmResult, this, &MainWindow::updateAsmTextEdit);
-
     connect(ui->actionSettings, &QAction::triggered, this, &MainWindow::openSettingsDialog);
+    connect(ui->actionSave_asm_to_file, &QAction::triggered, this, &MainWindow::saveToFile);
+    connect(ui->actionSave_code_to_file, &QAction::triggered, this, &MainWindow::saveToFile);
 }
 
 static bool isCompilerAvailable(const QString& compiler)
@@ -307,4 +309,19 @@ void MainWindow::on_localCheckbox_stateChanged(int state)
         ui->languagesComboBox->setDisabled(false);
         CompileSvc::instance()->sendRequest(QGodBolt::Endpoints::Languages);
     }
+}
+
+void MainWindow::saveToFile()
+{
+    auto action = sender();
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save As..."));
+    QFile file(fileName);
+    file.open(QIODevice::WriteOnly);
+    QTextStream s(&file);
+    if (action->objectName() == "actionSave_asm_to_file") {
+        s << ui->asmTextEdit->toPlainText();
+    } else {
+        s << ui->codeTextEdit->toPlainText();
+    }
+    file.close();
 }
