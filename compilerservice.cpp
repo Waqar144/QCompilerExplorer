@@ -2,17 +2,20 @@
 
 #include <QtNetwork/QNetworkReply>
 
+#include <QJsonDocument>
+#include <QJsonObject>
+
 static const char url[] = "https://godbolt.org/api/";
 
-CompileSvc* CompileSvc::instance()
+CompilerExplorerSvc* CompilerExplorerSvc::instance()
 {
-    static CompileSvc s_instance;
+    static CompilerExplorerSvc s_instance;
     return &s_instance;
 }
 
-void CompileSvc::sendRequest(QGodBolt::Endpoints endpoint, const QString& additional)
+void CompilerExplorerSvc::sendRequest(QCompilerExplorer::Endpoints endpoint, const QString& additional)
 {
-    QString endp = QGodBolt::endpointsToString.value(endpoint);
+    QString endp = QCompilerExplorer::endpointsToString.value(endpoint);
     QString requestUrl = url + endp + additional;
     QUrl url { requestUrl };
     QNetworkRequest req { url };
@@ -22,7 +25,7 @@ void CompileSvc::sendRequest(QGodBolt::Endpoints endpoint, const QString& additi
     mgr->get(req);
 }
 
-void CompileSvc::compileRequest(const QString& endpoint, const QByteArray& obj)
+void CompilerExplorerSvc::compileRequest(const QString& endpoint, const QByteArray& obj)
 {
     QString requestUrl = url + endpoint;
     QNetworkRequest req { QUrl { requestUrl } };
@@ -31,7 +34,7 @@ void CompileSvc::compileRequest(const QString& endpoint, const QByteArray& obj)
     mgr->post(req, obj);
 }
 
-QNetworkReply* CompileSvc::tooltipRequest(const QString& asmWord)
+QNetworkReply* CompilerExplorerSvc::tooltipRequest(const QString& asmWord)
 {
     QNetworkRequest request;
     QString urlString = url;
@@ -42,42 +45,77 @@ QNetworkReply* CompileSvc::tooltipRequest(const QString& asmWord)
     return mgr->get(request);
 }
 
-CompileSvc::~CompileSvc()
+CompilerExplorerSvc::~CompilerExplorerSvc()
 {
     delete mgr;
 }
 
-CompileSvc::CompileSvc(QObject* parent)
+CompilerExplorerSvc::CompilerExplorerSvc(QObject* parent)
     : QObject(parent)
 {
     mgr = new QNetworkAccessManager(this);
-    connect(mgr, &QNetworkAccessManager::finished, this, &CompileSvc::slotNetworkReply);
+    connect(mgr, &QNetworkAccessManager::finished, this, &CompilerExplorerSvc::slotNetworkReply);
 }
 
-void CompileSvc::slotNetworkReply(QNetworkReply* reply)
+void CompilerExplorerSvc::slotNetworkReply(QNetworkReply* reply)
 {
     const QString path = reply->url().path().split('/').at(2);
-    QGodBolt::Endpoints endpoint;
+    QCompilerExplorer::Endpoints endpoint;
     if (path.startsWith("compilers"))
-        endpoint = QGodBolt::stringToEndpoint.value("compilers");
+        endpoint = QCompilerExplorer::stringToEndpoint.value("compilers");
     else if (path.startsWith("compiler"))
-        endpoint = QGodBolt::stringToEndpoint.value("compiler");
+        endpoint = QCompilerExplorer::stringToEndpoint.value("compiler");
     else if (path.startsWith("asm"))
         return;
     else
-        endpoint = QGodBolt::stringToEndpoint.value(path);
+        endpoint = QCompilerExplorer::stringToEndpoint.value(path);
     const QByteArray data = reply->readAll();
 
     switch (endpoint) {
-    case QGodBolt::Languages: {
+    case QCompilerExplorer::Languages: {
         emit languages(data);
         break;
     }
-    case QGodBolt::Compilers:
+    case QCompilerExplorer::Compilers:
         emit compilers(data);
         break;
-    case QGodBolt::CompilerCompile:
+    case QCompilerExplorer::CompilerCompile:
         emit asmResult(data);
         break;
     }
+}
+
+QJsonDocument CompilerExplorerSvc::getCompilationOptions(const QString& source, const QString& userArgs, bool isIntel)
+{
+    //opt obj
+    QJsonObject optObj;
+    optObj["userArguments"] = userArgs;
+
+    //compiler options obj
+    QJsonObject compilerObj;
+    compilerObj["skipAsm"] = false;
+    compilerObj["executorRequest"] = false;
+
+    //add compileropts to opt obj
+    optObj["compilerOptions"] = compilerObj;
+
+    //filters
+    QJsonObject filterObj;
+    filterObj["binary"] = false;
+    filterObj["commentOnly"] = true;
+    filterObj["demangle"] = true;
+    filterObj["directives"] = true;
+    filterObj["intel"] = isIntel;
+    filterObj["labels"] = true;
+    filterObj["execute"] = false;
+
+    optObj["filters"] = filterObj;
+
+    QJsonObject main;
+    //    main["source"] = "int sum(){ return 2 + 2; }";
+    main["source"] = source;
+    main["options"] = optObj;
+
+    QJsonDocument doc { main };
+    return doc;
 }

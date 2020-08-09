@@ -5,17 +5,18 @@
 #include <QObject>
 #include <QtNetwork/QNetworkAccessManager>
 
-class CompileSvc : public QObject
+class CompilerExplorerSvc : public QObject
 {
     Q_OBJECT
 public:
-    static CompileSvc* instance();
-    void sendRequest(QGodBolt::Endpoints endpoint, const QString& additional = QString());
+    static CompilerExplorerSvc* instance();
+    void sendRequest(QCompilerExplorer::Endpoints endpoint, const QString& additional = QString());
     void compileRequest(const QString& endpoint, const QByteArray& obj);
     QNetworkReply* tooltipRequest(const QString& asmWord);
 
-    ~CompileSvc();
+    ~CompilerExplorerSvc();
 
+    static QJsonDocument getCompilationOptions(const QString &source, const QString &userArgs, bool isIntel);
 private slots:
     void slotNetworkReply(QNetworkReply* reply);
 
@@ -25,7 +26,7 @@ signals:
     void asmResult(const QByteArray& data);
 
 private:
-    CompileSvc(QObject* parent = nullptr);
+    CompilerExplorerSvc(QObject* parent = nullptr);
     QNetworkAccessManager* mgr;
 };
 

@@ -36,7 +36,6 @@ private slots:
 private:
     void initConnections();
     void loadLocalCompilers();
-    QJsonDocument getCompilationOptions(const QString& source, const QString& userArgs, bool isIntel) const;
     /* Private Member Variables*/
 private:
     Ui::MainWindow *ui;
