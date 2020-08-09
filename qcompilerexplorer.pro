@@ -31,7 +31,8 @@ SOURCES += \
     mainwindow.cpp \
     QSourceHighlite/qsourcehighliter.cpp \
     QSourceHighlite/languagedata.cpp \
-    QSourceHighlite/qsourcehighliterthemes.cpp
+    QSourceHighlite/qsourcehighliterthemes.cpp \
+    widgets/argslineedit.cpp
 
 HEADERS += \
     asmhighlighter.h \
@@ -46,7 +47,8 @@ HEADERS += \
     mainwindow.h \
     QSourceHighlite/qsourcehighliter.h \
     QSourceHighlite/languagedata.h \
-    QSourceHighlite/qsourcehighliterthemes.h
+    QSourceHighlite/qsourcehighliterthemes.h \
+    widgets/argslineedit.h
 
 FORMS += \
     mainwindow.ui \

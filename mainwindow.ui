@@ -43,7 +43,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="argsLineEdit"/>
+           <widget class="ArgsLineEdit" name="argsLineEdit"/>
           </item>
           <item>
            <widget class="QCheckBox" name="isIntelSyntax">
@@ -133,6 +133,11 @@
    <class>AsmTextEdit</class>
    <extends>QPlainTextEdit</extends>
    <header>asmtextedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ArgsLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">widgets/argslineedit.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
