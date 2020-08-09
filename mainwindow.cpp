@@ -105,34 +105,22 @@ void MainWindow::initConnections()
     connect(ui->actionSave_code_to_file, &QAction::triggered, this, &MainWindow::saveToFile);
 }
 
-static bool isCompilerAvailable(const QString& compiler)
-{
-    return QProcess::execute(compiler, {}) != -2;
-}
-
-static QString getCompilerVersion(const QString& compiler)
-{
-    QProcess p;
-    p.start(compiler, {"--version"});
-    if (!p.waitForFinished()) {
-        qWarning () << "Error: " << p.errorString();
-    }
-    QString result = p.readAllStandardOutput();
-    return result.split(QRegularExpression("\\s|\\n")).at(2);
-}
-
 void MainWindow::loadLocalCompilers()
 {
     if (!ui->localCheckbox->isChecked())
         return;
+    //clear previous things in combobox
     ui->compilerComboBox->clear();
-    if (isCompilerAvailable("g++")) {
-        const QString version = getCompilerVersion("g++");
-        ui->compilerComboBox->addItem("g++ " + version, "g++");
+    //check compiler availability and populate the combobox
+    QString gpp = QStringLiteral("g++");
+    QString clang = QStringLiteral("clang++");
+    if (Compiler::isCompilerAvailable(gpp)) {
+        const QString version = Compiler::getCompilerVersion(gpp);
+        ui->compilerComboBox->addItem(gpp + QLatin1Char(' ') + version, gpp);
     }
-    if (isCompilerAvailable("clang++")) {
-        const QString version = getCompilerVersion("clang++");
-        ui->compilerComboBox->addItem("clang++ " + version, "clang++");
+    if (Compiler::isCompilerAvailable(clang)) {
+        const QString version = Compiler::getCompilerVersion(clang);
+        ui->compilerComboBox->addItem(clang + QLatin1Char(' ') + version, clang);
     }
 }
 

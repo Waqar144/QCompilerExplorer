@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QProcess>
 #include <QDebug>
+#include <QRegularExpression>
 
 Compiler::Compiler(QString compiler)
     : m_compiler{compiler}
@@ -15,6 +16,22 @@ QStringList Compiler::getArgs(QStringList args)
                      "-fno-asynchronous-unwind-tables", //omit cfi directives
                      "-fno-dwarf2-cfi-asm"});
     return argsList;
+}
+
+bool Compiler::isCompilerAvailable(const QString& compiler)
+{
+    return QProcess::execute(compiler, {}) != -2;
+}
+
+QString Compiler::getCompilerVersion(const QString& compiler)
+{
+    QProcess p;
+    p.start(compiler, {"--version"});
+    if (!p.waitForFinished()) {
+        qWarning () << "Error: " << p.errorString();
+    }
+    QString result = p.readAllStandardOutput();
+    return result.split(QRegularExpression("\\s|\\n")).at(2);
 }
 
 std::pair<QString, bool> Compiler::compileToAsm(const QString &source,
