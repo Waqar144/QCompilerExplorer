@@ -100,9 +100,12 @@ void MainWindow::initConnections()
     connect(CompilerExplorerSvc::instance(), &CompilerExplorerSvc::languages, this, &MainWindow::setupLanguages);
     connect(CompilerExplorerSvc::instance(), &CompilerExplorerSvc::compilers, this, &MainWindow::updateCompilerComboBox);
     connect(CompilerExplorerSvc::instance(), &CompilerExplorerSvc::asmResult, this, &MainWindow::updateAsmTextEdit);
+
     connect(ui->actionSettings, &QAction::triggered, this, &MainWindow::openSettingsDialog);
     connect(ui->actionSave_asm_to_file, &QAction::triggered, this, &MainWindow::saveToFile);
     connect(ui->actionSave_code_to_file, &QAction::triggered, this, &MainWindow::saveToFile);
+    connect(ui->compileButton, &QPushButton::clicked, this, &MainWindow::on_compileButtonPress);
+    connect(ui->compileButton, &QPushButton::clicked, this, &MainWindow::on_compileButton_clicked);
 }
 
 void MainWindow::loadLocalCompilers()
@@ -140,8 +143,8 @@ void MainWindow::on_compileButton_clicked()
 {
     if (ui->codeTextEdit->toPlainText().isEmpty())
         return;
+    //on_compileButtonPress slot wilil be executed for local compilation
     if (ui->localCheckbox->isChecked()) {
-        on_compileButtonPress();
         return;
     }
     const QString text = ui->codeTextEdit->toPlainText();
