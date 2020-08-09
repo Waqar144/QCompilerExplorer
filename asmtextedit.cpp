@@ -37,7 +37,7 @@ void AsmTextEdit::mouseMoveEvent(QMouseEvent* event)
     if (strWord.isEmpty()) return;
     auto gpos = mapToGlobal(event->pos());
 
-    QNetworkReply* reply = CompileSvc::instance()->tooltipRequest(strWord);
+    QNetworkReply* reply = CompilerExplorerSvc::instance()->tooltipRequest(strWord);
     connect(reply, &QNetworkReply::readyRead, this, [=]() {
         QJsonObject doc = QJsonDocument::fromJson(reply->readAll()).object();
         auto resultObj = doc.value("result").toObject();

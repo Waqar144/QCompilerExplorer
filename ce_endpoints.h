@@ -3,7 +3,7 @@
 
 #include <QHash>
 
-namespace QGodBolt
+namespace QCompilerExplorer
 {
 enum Endpoints {
     Languages,
