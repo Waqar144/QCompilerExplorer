@@ -49,9 +49,9 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow()
 {
-    //save the value of intel syntax
     QSettings settings;
     settings.setValue("intelSyntax", ui->isIntelSyntax->isChecked());
+    settings.setValue("localCE", ui->localCheckbox->isChecked());
     settings.setValue("geometry", saveGeometry());
     settings.setValue("windowState", saveState());
     delete ui;
@@ -180,7 +180,7 @@ void MainWindow::openSettingsDialog()
 void MainWindow::on_compilerComboBox_currentIndexChanged(const QString& arg1)
 {
     QSettings settings;
-    int isLocal = settings.value("localCE").toInt();
+    int isLocal = ui->localCheckbox->checkState();
     if (isLocal != Qt::Checked) {
         settings.setValue("lastUsedCompilerFor" + ui->languagesComboBox->currentText(), arg1);
     }
@@ -218,8 +218,6 @@ void MainWindow::on_compileButtonPress()
 
 void MainWindow::on_localCheckbox_stateChanged(int state)
 {
-    QSettings settings;
-    settings.setValue("localCE", state);
     if (state == Qt::Checked) {
         ui->languagesComboBox->setDisabled(true);
         loadLocalCompilers();
