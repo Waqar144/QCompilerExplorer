@@ -4,6 +4,7 @@
 #include "compilerservice.h"
 #include "settingsdialog.h"
 #include "asmparser.h"
+#include "compiler.h"
 
 #include <QFileDialog>
 #include <QJsonArray>
@@ -235,58 +236,27 @@ void MainWindow::on_compileButtonPress()
         return;
 
     const QString source = ui->codeTextEdit->toPlainText();
+    auto compilerName = ui->compilerComboBox->currentData().toString();
+    const bool intelSyntax = ui->isIntelSyntax->isChecked();
+    const QString args = ui->argsLineEdit->text();
+    const QStringList argsList = [&args]() -> QStringList
+    {
+            if (!args.isEmpty()) {
+                return args.split(QLatin1Char(' '));
+            }
+            return {};
+    }();
 
-    QFile f("./x.cpp");
-    if (f.open(QFile::ReadWrite | QFile::Truncate | QFile::Unbuffered)) {
-        f.write(source.toUtf8());
-        f.waitForBytesWritten(3000);
-    }
+    const Compiler compiler(std::move(compilerName));
+    std::pair<QString, bool> out = compiler.compileToAsm(source, argsList, intelSyntax);
 
-    QProcess p;
-    auto compiler = ui->compilerComboBox->currentData().toString();
-    p.setProgram(compiler);
-
-    QString args = ui->argsLineEdit->text();
-    QStringList argsList;
-    if (!args.isEmpty())
-        argsList = args.split(QLatin1Char(' '));
-
-    argsList.append(QStringLiteral("-S"));
-    if (ui->isIntelSyntax->isChecked()) {
-        argsList.append(QStringLiteral("-masm=intel"));;
-    }
-    argsList.append({"-fno-asynchronous-unwind-tables",
-                     "-fno-dwarf2-cfi-asm",
-                     "./x.cpp"});
-
-    p.setArguments(argsList);
-    p.start();
-    if (!p.waitForFinished()) {
-        qWarning () << "Exit status: " <<  p.exitStatus();
-        qWarning () << "Error: " << p.readAllStandardError();
-        return;
-    }
-
-    const QString error = p.readAllStandardError();
-
-    if (!error.isEmpty()) {
-        qWarning () << error;
-        qWarning () << p.error();
-        if (error.contains("error:")) {
-            ui->asmTextEdit->setPlainText("<compilation failed>\n" + error);
-            return;
-        }
-    }
-
-    QFile file("./x.s");
-    if (file.open(QFile::ReadOnly)) {
-        auto all = file.readAll();
+    if (out.second) {
         AsmParser p;
-        QString demangled = p.demangle(std::move(all));
+        QString demangled = p.demangle(std::move(out.first));
         QString cleanAsm = p.process(demangled.toUtf8());
         ui->asmTextEdit->setPlainText(cleanAsm);
     } else {
-        qDebug () << "failed to open x.s";
+        ui->asmTextEdit->setPlainText("<Compilation Failed>\n" + out.first);
     }
 }
 

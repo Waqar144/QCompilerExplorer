@@ -21,6 +21,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     asmparser.cpp \
+    compiler.cpp \
     compilerservice.cpp \
     main.cpp \
     settingsdialog.cpp \
@@ -38,6 +39,7 @@ HEADERS += \
     asmhighlighter.h \
     asmparser.h \
     ce_endpoints.h \
+    compiler.h \
     compilerservice.h \
     settingsdialog.h \
     widgets/QCodeEditor.h \
