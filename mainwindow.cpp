@@ -86,14 +86,11 @@ void MainWindow::updateCompilerComboBox(const QByteArray& data)
 
 void MainWindow::updateAsmTextEdit(const QByteArray& data)
 {
-    //    std::cout << "\n\nRecieved:\n"
-    //              << data.toStdString() << "\n";
     const QJsonArray assembly = QJsonDocument::fromJson(data).object().value("asm").toArray();
     QString asmText;
     for (const auto& line : assembly) {
         asmText.append(line["text"].toString() + "\n");
     }
-    //    qDebug() << asmText;
     ui->asmTextEdit->setPlainText(asmText);
 }
 
@@ -117,7 +114,7 @@ static QString getCompilerVersion(const QString& compiler)
     QProcess p;
     p.start(compiler, {"--version"});
     if (!p.waitForFinished()) {
-        qDebug () << "Error: " << p.errorString();
+        qWarning () << "Error: " << p.errorString();
     }
     QString result = p.readAllStandardOutput();
     return result.split(QRegularExpression("\\s|\\n")).at(2);
@@ -198,8 +195,6 @@ void MainWindow::on_compileButton_clicked()
     bool isIntel = ui->isIntelSyntax->isChecked();
     auto data = getCompilationOptions(text, args, isIntel);
 
-    //    qDebug() << data.toJson(QJsonDocument::JsonFormat::Compact);
-
     QString endpoint = "compiler/" + ui->compilerComboBox->currentData().toString() + "/compile";
     CompileSvc::instance()->compileRequest(endpoint, data.toJson());
 }
@@ -244,11 +239,9 @@ void MainWindow::on_compileButtonPress()
     QFile f("./x.cpp");
     if (f.open(QFile::ReadWrite | QFile::Truncate | QFile::Unbuffered)) {
         f.write(source.toUtf8());
-        bool res = f.waitForBytesWritten(3000);
-        qDebug () << "Res: " << res;
+        f.waitForBytesWritten(3000);
     }
 
-    qDebug () << "Starting";
     QProcess p;
     auto compiler = ui->compilerComboBox->currentData().toString();
     p.setProgram(compiler);
@@ -266,20 +259,19 @@ void MainWindow::on_compileButtonPress()
                      "-fno-dwarf2-cfi-asm",
                      "./x.cpp"});
 
-    qDebug () << argsList;
     p.setArguments(argsList);
     p.start();
     if (!p.waitForFinished()) {
-        qDebug () << "Exit status: " <<  p.exitStatus();
-        qDebug () << "Error: " << p.readAllStandardError();
+        qWarning () << "Exit status: " <<  p.exitStatus();
+        qWarning () << "Error: " << p.readAllStandardError();
         return;
     }
 
     const QString error = p.readAllStandardError();
 
     if (!error.isEmpty()) {
-        qDebug () << error;
-        qDebug () << p.error();
+        qWarning () << error;
+        qWarning () << p.error();
         if (error.contains("error:")) {
             ui->asmTextEdit->setPlainText("<compilation failed>\n" + error);
             return;
