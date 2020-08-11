@@ -14,7 +14,8 @@ QStringList Compiler::getArgs(QStringList args)
     QStringList argsList{std::move(args)};
     argsList.append({"-S",                              //output assembly
                      "-fno-asynchronous-unwind-tables", //omit cfi directives
-                     "-fno-dwarf2-cfi-asm"});
+                     "-fno-dwarf2-cfi-asm"
+                    "-fno-stack-protector"});
     return argsList;
 }
 
