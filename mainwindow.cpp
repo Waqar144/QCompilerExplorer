@@ -37,8 +37,8 @@ MainWindow::MainWindow(QWidget* parent)
     restoreGeometry(settings.value("geometry").toByteArray());
     restoreState(settings.value("windowState").toByteArray());
 
-    Qt::CheckState isLocal = static_cast<Qt::CheckState>(settings.value("localCE", true).toInt());
-    if (isLocal != Qt::Checked) {
+    bool isLocal = settings.value("localCE", true).toBool();
+    if (!isLocal) {
         CompilerExplorerSvc::instance()->sendRequest(QCompilerExplorer::Endpoints::Languages);
     } else {
         ui->localCheckbox->setCheckState(Qt::Checked);
