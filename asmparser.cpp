@@ -38,13 +38,13 @@ QString AsmParser::process(const QByteArray &asmText)
 
     const QVector<QString> allowedDirectives =
     {
-        ".string",
-        ".ascii",
-        ".zero",
-        ".byte",
-        ".value",
-        ".long",
-        ".quad"
+        QStringLiteral(".string"),
+        QStringLiteral(".ascii"),
+        QStringLiteral(".zero"),
+        QStringLiteral(".byte"),
+        QStringLiteral(".value"),
+        QStringLiteral(".long"),
+        QStringLiteral(".quad")
     };
 
     //<label, used>

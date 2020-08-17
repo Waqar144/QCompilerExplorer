@@ -10,8 +10,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->setupUi(this);
 
     QSettings settings;
-    ui->fontComboBox->setCurrentText(settings.value("font").toString());
-    ui->spinBox->setValue(settings.value("fontSize", 12).toInt());
+    ui->fontComboBox->setCurrentText(settings.value(QStringLiteral("font")).toString());
+    ui->spinBox->setValue(settings.value(QStringLiteral("fontSize"), 12).toInt());
 }
 
 SettingsDialog::~SettingsDialog()
@@ -32,6 +32,6 @@ void SettingsDialog::on_spinBox_valueChanged(int arg1)
 void SettingsDialog::on_SettingsDialog_accepted()
 {
     QSettings settings;
-    settings.setValue("fontSize", ui->spinBox->value());
-    settings.setValue("font", ui->fontComboBox->currentFont().family());
+    settings.setValue(QStringLiteral("fontSize"), ui->spinBox->value());
+    settings.setValue(QStringLiteral("font"), ui->fontComboBox->currentFont().family());
 }

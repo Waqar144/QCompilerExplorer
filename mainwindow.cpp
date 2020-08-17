@@ -31,13 +31,13 @@ MainWindow::MainWindow(QWidget* parent)
     ui->centralwidget->layout()->addWidget(split);
 
     QSettings settings;
-    auto isIntel = settings.value("intelSyntax").toBool();
+    auto isIntel = settings.value(QStringLiteral("intelSyntax")).toBool();
     ui->isIntelSyntax->setChecked(isIntel);
 
-    restoreGeometry(settings.value("geometry").toByteArray());
-    restoreState(settings.value("windowState").toByteArray());
+    restoreGeometry(settings.value(QStringLiteral("geometry")).toByteArray());
+    restoreState(settings.value(QStringLiteral("windowState")).toByteArray());
 
-    bool isLocal = settings.value("localCE", true).toBool();
+    bool isLocal = settings.value(QStringLiteral("localCE"), true).toBool();
     if (!isLocal) {
         CompilerExplorerSvc::instance()->sendRequest(QCompilerExplorer::Endpoints::Languages);
     } else {
@@ -50,10 +50,10 @@ MainWindow::MainWindow(QWidget* parent)
 MainWindow::~MainWindow()
 {
     QSettings settings;
-    settings.setValue("intelSyntax", ui->isIntelSyntax->isChecked());
-    settings.setValue("localCE", ui->localCheckbox->isChecked());
-    settings.setValue("geometry", saveGeometry());
-    settings.setValue("windowState", saveState());
+    settings.setValue(QStringLiteral("intelSyntax"), ui->isIntelSyntax->isChecked());
+    settings.setValue(QStringLiteral("localCE"), ui->localCheckbox->isChecked());
+    settings.setValue(QStringLiteral("geometry"), saveGeometry());
+    settings.setValue(QStringLiteral("windowState"), saveState());
     delete ui;
 }
 
@@ -63,8 +63,8 @@ void MainWindow::setupLanguages(const QByteArray& data)
     const QJsonArray json = QJsonDocument::fromJson(data).array();
     ui->languagesComboBox->blockSignals(true);
     for (const auto& value : json) {
-        const auto lang = value["name"].toString();
-        ui->languagesComboBox->addItem(lang, value["id"].toString());
+        const auto lang = value[QStringLiteral("name")].toString();
+        ui->languagesComboBox->addItem(lang, value[QStringLiteral("id")].toString());
     }
     ui->languagesComboBox->blockSignals(false);
     auto lang = settings.value(QStringLiteral("lastUsedLanguage")).toString();
@@ -87,10 +87,10 @@ void MainWindow::updateCompilerComboBox(const QByteArray& data)
 
 void MainWindow::updateAsmTextEdit(const QByteArray& data)
 {
-    const QJsonArray assembly = QJsonDocument::fromJson(data).object().value("asm").toArray();
+    const QJsonArray assembly = QJsonDocument::fromJson(data).object().value(QStringLiteral("asm")).toArray();
     QString asmText;
     for (const auto& line : assembly) {
-        asmText.append(line["text"].toString() + "\n");
+        asmText.append(line["text"].toString() + QLatin1Char('\n'));
     }
     ui->asmTextEdit->setPlainText(asmText);
 }
@@ -131,12 +131,12 @@ void MainWindow::on_languagesComboBox_currentIndexChanged(const QString& arg1)
 {
     Q_UNUSED(arg1)
     const QString language = ui->languagesComboBox->currentData().toString();
-    const QString languageId = '/' + language;
+    const QString languageId = QLatin1Char('/') + language;
     CompilerExplorerSvc::instance()->sendRequest(QCompilerExplorer::Endpoints::Compilers, languageId);
     ui->codeTextEdit->setCurrentLanguage(language);
     ui->compilerComboBox->clear();
     QSettings settings;
-    settings.setValue("lastUsedLanguage", arg1);
+    settings.setValue(QStringLiteral("lastUsedLanguage"), arg1);
 }
 
 void MainWindow::on_compileButton_clicked()
@@ -152,7 +152,8 @@ void MainWindow::on_compileButton_clicked()
     bool isIntel = ui->isIntelSyntax->isChecked();
     auto data = CompilerExplorerSvc::getCompilationOptions(text, args, isIntel);
 
-    QString endpoint = "compiler/" + ui->compilerComboBox->currentData().toString() + "/compile";
+    QString endpoint = QStringLiteral("compiler/") +
+            ui->compilerComboBox->currentData().toString() + QStringLiteral("/compile");
     CompilerExplorerSvc::instance()->compileRequest(endpoint, data.toJson());
 }
 
@@ -182,7 +183,8 @@ void MainWindow::on_compilerComboBox_currentIndexChanged(const QString& arg1)
     QSettings settings;
     int isLocal = ui->localCheckbox->checkState();
     if (isLocal != Qt::Checked) {
-        settings.setValue("lastUsedCompilerFor" + ui->languagesComboBox->currentText(), arg1);
+        settings.setValue(QStringLiteral("lastUsedCompilerFor")
+                          + ui->languagesComboBox->currentText(), arg1);
     }
 }
 
@@ -212,7 +214,7 @@ void MainWindow::on_compileButtonPress()
         QString cleanAsm = p.process(demangled.toUtf8());
         ui->asmTextEdit->setPlainText(cleanAsm);
     } else {
-        ui->asmTextEdit->setPlainText("<Compilation Failed>\n" + out.first);
+        ui->asmTextEdit->setPlainText(QStringLiteral("<Compilation Failed>\n") + out.first);
     }
 }
 
@@ -234,7 +236,7 @@ void MainWindow::saveToFile()
     QFile file(fileName);
     file.open(QIODevice::WriteOnly);
     QTextStream s(&file);
-    if (action->objectName() == "actionSave_asm_to_file") {
+    if (action->objectName() == QStringLiteral("actionSave_asm_to_file")) {
         s << ui->asmTextEdit->toPlainText();
     } else {
         s << ui->codeTextEdit->toPlainText();

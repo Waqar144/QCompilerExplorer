@@ -61,11 +61,11 @@ void CompilerExplorerSvc::slotNetworkReply(QNetworkReply* reply)
 {
     const QString path = reply->url().path().split('/').at(2);
     QCompilerExplorer::Endpoints endpoint;
-    if (path.startsWith("compilers"))
-        endpoint = QCompilerExplorer::stringToEndpoint.value("compilers");
-    else if (path.startsWith("compiler"))
-        endpoint = QCompilerExplorer::stringToEndpoint.value("compiler");
-    else if (path.startsWith("asm"))
+    if (path.startsWith(QLatin1String("compilers")))
+        endpoint = QCompilerExplorer::stringToEndpoint.value(QStringLiteral("compilers"));
+    else if (path.startsWith(QLatin1String("compiler")))
+        endpoint = QCompilerExplorer::stringToEndpoint.value(QStringLiteral("compiler"));
+    else if (path.startsWith(QStringLiteral("asm")))
         return;
     else
         endpoint = QCompilerExplorer::stringToEndpoint.value(path);
@@ -89,32 +89,32 @@ QJsonDocument CompilerExplorerSvc::getCompilationOptions(const QString& source, 
 {
     //opt obj
     QJsonObject optObj;
-    optObj["userArguments"] = userArgs;
+    optObj[QStringLiteral("userArguments")] = userArgs;
 
     //compiler options obj
     QJsonObject compilerObj;
-    compilerObj["skipAsm"] = false;
-    compilerObj["executorRequest"] = false;
+    compilerObj[QStringLiteral("skipAsm")] = false;
+    compilerObj[QStringLiteral("executorRequest")] = false;
 
     //add compileropts to opt obj
-    optObj["compilerOptions"] = compilerObj;
+    optObj[QStringLiteral("compilerOptions")] = compilerObj;
 
     //filters
     QJsonObject filterObj;
-    filterObj["binary"] = false;
-    filterObj["commentOnly"] = true;
-    filterObj["demangle"] = true;
-    filterObj["directives"] = true;
-    filterObj["intel"] = isIntel;
-    filterObj["labels"] = true;
-    filterObj["execute"] = false;
+    filterObj[QStringLiteral("binary")] = false;
+    filterObj[QStringLiteral("commentOnly")] = true;
+    filterObj[QStringLiteral("demangle")] = true;
+    filterObj[QStringLiteral("directives")] = true;
+    filterObj[QStringLiteral("intel")] = isIntel;
+    filterObj[QStringLiteral("labels")] = true;
+    filterObj[QStringLiteral("execute")] = false;
 
-    optObj["filters"] = filterObj;
+    optObj[QStringLiteral("filters")] = filterObj;
 
     QJsonObject main;
     //    main["source"] = "int sum(){ return 2 + 2; }";
-    main["source"] = source;
-    main["options"] = optObj;
+    main[QStringLiteral("source")] = source;
+    main[QStringLiteral("options")] = optObj;
 
     QJsonDocument doc { main };
     return doc;

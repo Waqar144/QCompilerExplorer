@@ -17,16 +17,16 @@ AsmTextEdit::AsmTextEdit(QWidget* parent)
     getHighlighter()->setCurrentLanguage(QSourceHighlite::QSourceHighliter::Language::CodeAsm);
 
     QSettings settings;
-    QString fontSetting = settings.value("font").toString();
+    QString fontSetting = settings.value(QStringLiteral("font")).toString();
     QFont font = fontSetting.isEmpty() ? QFontDatabase::systemFont(QFontDatabase::FixedFont) : fontSetting;
     font.setFixedPitch(true);
-    font.setPointSize(settings.value("fontSize", 12).toInt());
+    font.setPointSize(settings.value(QStringLiteral("fontSize"), 12).toInt());
 
     setFont(font);
     setTabStopDistance(4 * QFontMetrics(font).horizontalAdvance(' '));
 
     //set background
-    setStyleSheet("background-color: #272822;");
+    setStyleSheet(QStringLiteral("background-color: #272822;"));
 }
 
 void AsmTextEdit::mouseMoveEvent(QMouseEvent* event)
@@ -40,8 +40,8 @@ void AsmTextEdit::mouseMoveEvent(QMouseEvent* event)
     QNetworkReply* reply = CompilerExplorerSvc::instance()->tooltipRequest(strWord);
     connect(reply, &QNetworkReply::readyRead, this, [=]() {
         QJsonObject doc = QJsonDocument::fromJson(reply->readAll()).object();
-        auto resultObj = doc.value("result").toObject();
-        auto value = resultObj.value("tooltip").toString();
+        auto resultObj = doc.value(QStringLiteral("result")).toObject();
+        auto value = resultObj.value(QStringLiteral("tooltip")).toString();
         QString tooltip = value;
         QToolTip::showText(gpos, value, this);
     });
