@@ -14,6 +14,9 @@ public:
     // QWidget interface
 protected:
     void mouseMoveEvent(QMouseEvent* event);
+
+private:
+    QString getCurrentWordUnderCursor();
 };
 
 #endif // ASMTEXTEDIT_H

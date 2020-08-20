@@ -33,9 +33,8 @@ void AsmTextEdit::mouseMoveEvent(QMouseEvent* event)
 {
     QTextCursor tc = cursorForPosition(event->pos());
     tc.select(QTextCursor::WordUnderCursor);
-    QString strWord = tc.selectedText();
+    const QString strWord = tc.selectedText();
     if (strWord.isEmpty()) return;
-    auto gpos = mapToGlobal(event->pos());
 
     QNetworkReply* reply = CompilerExplorerSvc::instance()->tooltipRequest(strWord);
     connect(reply, &QNetworkReply::readyRead, this, [=]() {
@@ -43,7 +42,20 @@ void AsmTextEdit::mouseMoveEvent(QMouseEvent* event)
         auto resultObj = doc.value(QStringLiteral("result")).toObject();
         auto value = resultObj.value(QStringLiteral("tooltip")).toString();
         QString tooltip = value;
-        QToolTip::showText(gpos, value, this);
+
+        const QString currentWord = getCurrentWordUnderCursor();
+
+        if (currentWord == strWord)
+            QToolTip::showText(QCursor::pos(), value, this);
     });
     return QCodeEditor::mouseMoveEvent(event);
+}
+
+QString AsmTextEdit::getCurrentWordUnderCursor()
+{
+    const auto currentPosInWidget = mapFromGlobal(QCursor::pos());
+    QTextCursor currentCursor = cursorForPosition(currentPosInWidget);
+    currentCursor.select(QTextCursor::WordUnderCursor);
+    auto currentWord = currentCursor.selectedText();
+    return currentWord;
 }
