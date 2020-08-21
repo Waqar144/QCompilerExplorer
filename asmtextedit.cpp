@@ -41,7 +41,6 @@ void AsmTextEdit::mouseMoveEvent(QMouseEvent* event)
         QJsonObject doc = QJsonDocument::fromJson(reply->readAll()).object();
         auto resultObj = doc.value(QStringLiteral("result")).toObject();
         auto value = resultObj.value(QStringLiteral("tooltip")).toString();
-        QString tooltip = value;
 
         const QString currentWord = getCurrentWordUnderCursor();
 

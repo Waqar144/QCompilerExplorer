@@ -13,9 +13,7 @@
 QLineNumberArea::QLineNumberArea(QCodeEditor* parent)
     : QWidget(parent)
     , m_codeEditParent(parent)
-{
-
-}
+{}
 
 QSize QLineNumberArea::sizeHint() const
 {

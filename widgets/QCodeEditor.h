@@ -185,7 +185,7 @@ private:
      * @brief Method, that performs selection
      * frame selection.
      */
-    void handleSelectionQuery(QTextCursor cursor);
+    void handleSelectionQuery(const QTextCursor& cursor);
 
     /**
      * @brief Method for updating geometry of line number area.

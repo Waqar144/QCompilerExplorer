@@ -13,21 +13,8 @@ int QFramedTextAttribute::type()
 }
 
 QFramedTextAttribute::QFramedTextAttribute(QObject* parent) :
-    QObject(parent),
-    m_style(nullptr)
-{
-
-}
-
-void QFramedTextAttribute::setSyntaxStyle(QSyntaxStyle* style)
-{
-    m_style = style;
-}
-
-QSyntaxStyle* QFramedTextAttribute::syntaxStyle() const
-{
-    return m_style;
-}
+    QObject(parent)
+{}
 
 QSizeF QFramedTextAttribute::intrinsicSize(QTextDocument*, int, const QTextFormat&)
 {
@@ -41,7 +28,8 @@ void QFramedTextAttribute::drawObject(QPainter* painter,
                                       const QTextFormat& format)
 {
     // Casting
-    auto textCharFormat = reinterpret_cast<const QTextCharFormat&>(format);
+//    auto textCharFormat = reinterpret_cast<const QTextCharFormat&>(format);
+    auto textCharFormat = static_cast<const QTextCharFormat&>(format);
 
     // Getting font data
     auto font = textCharFormat.font();
@@ -66,8 +54,6 @@ void QFramedTextAttribute::drawObject(QPainter* painter,
 
 void QFramedTextAttribute::frame(QTextCursor cursor)
 {
-    auto text = cursor.document()->findBlockByNumber(cursor.blockNumber()).text();
-
     QTextCharFormat format;
     format.setObjectType(type());
     format.setProperty(FramedString, cursor.selectedText());
@@ -90,6 +76,7 @@ void QFramedTextAttribute::frame(QTextCursor cursor)
 void QFramedTextAttribute::clear(QTextCursor cursor)
 {
     auto doc = cursor.document();
+    auto _type = type();
 
     for (auto blockIndex = 0;
          blockIndex < doc->blockCount();
@@ -102,7 +89,7 @@ void QFramedTextAttribute::clear(QTextCursor cursor)
 
         for (auto& format : formats)
         {
-            if (format.format.objectType() == type())
+            if (format.format.objectType() == _type)
             {
                 cursor.setPosition(block.position() + format.start - offset);
                 cursor.deleteChar();

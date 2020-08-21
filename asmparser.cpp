@@ -29,8 +29,6 @@ QString AsmParser::process(const QByteArray &asmText)
     //3. if the labels are unused, they get deleted
     //4. every line beginning with '.' gets deleted, unless it is a used label
 
-    QRegularExpression exp { QStringLiteral("^\\s*[_|a-zA-Z]") };
-
     QRegularExpression directiveRe { QStringLiteral("^\\s*\\..*$") };
     QRegularExpression labelRe { QStringLiteral("^\\.*[a-zA-Z]+[0-9]+:$") };
     QRegularExpression hasOpcodeRe { QStringLiteral("^\\s*[a-zA-Z]") };

@@ -91,6 +91,7 @@ void QCodeEditor::performConnections()
     connect(
         verticalScrollBar(),
         &QScrollBar::valueChanged,
+        this,
         [this](int){ m_lineNumberArea->update(); }
     );
 
@@ -220,7 +221,7 @@ void QCodeEditor::updateLineNumberArea(const QRect& rect)
     }
 }
 
-void QCodeEditor::handleSelectionQuery(QTextCursor cursor)
+void QCodeEditor::handleSelectionQuery(const QTextCursor& cursor)
 {
 
     auto searchIterator = cursor;

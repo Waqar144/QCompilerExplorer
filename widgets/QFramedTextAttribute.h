@@ -69,20 +69,5 @@ public:
      * with desired cursor.
      */
     void clear(QTextCursor cursor);
-
-    /**
-     * @brief Method for setting syntax style
-     * for rendering.
-     */
-    void setSyntaxStyle(QSyntaxStyle* style);
-
-    /**
-     * @brief Method for getting syntax style.
-     */
-    QSyntaxStyle* syntaxStyle() const;
-
-private:
-
-    QSyntaxStyle* m_style;
 };
 
