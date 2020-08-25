@@ -5,7 +5,6 @@
 #include <QTextEdit> // Required for inheritance
 
 class QLineNumberArea;
-class QFramedTextAttribute;
 
 /**
  * @brief Class, that describes code editor.
@@ -112,12 +111,6 @@ public Q_SLOTS:
      */
     void updateStyle();
 
-    /**
-     * @brief Slot, that will be called on selection
-     * change.
-     */
-    void onSelectionChanged();
-
     void updateFont(const QString& fontName);
 
     void updateFontSize(qreal fontSize);
@@ -164,12 +157,6 @@ protected:
 private:
 
     /**
-     * @brief Method for initializing document
-     * layout handlers.
-     */
-    void initDocumentLayoutHandlers();
-
-    /**
      * @brief Method for initializing default
      * monospace font.
      */
@@ -185,7 +172,7 @@ private:
      * @brief Method, that performs selection
      * frame selection.
      */
-    void handleSelectionQuery(const QTextCursor& cursor);
+    void handleSelectionQuery(QList<QTextEdit::ExtraSelection>& extra);
 
     /**
      * @brief Method for updating geometry of line number area.
@@ -227,8 +214,6 @@ private:
 
     QSourceHighlite::QSourceHighliter* m_highlighter;
     QLineNumberArea* m_lineNumberArea;
-
-    QFramedTextAttribute* m_framedAttribute;
 
     bool m_autoIndentation;
     bool m_autoParentheses;

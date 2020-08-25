@@ -1,6 +1,5 @@
 // QCodeEditor
 #include "QCodeEditor.h"
-#include "QFramedTextAttribute.h"
 #include "QLineNumberArea.h"
 
 #include "../QSourceHighlite/qsourcehighliter.h"
@@ -43,27 +42,16 @@ QCodeEditor::QCodeEditor(QWidget* widget)
     : QTextEdit(widget)
     , m_highlighter(new QSourceHighlite::QSourceHighliter(document()))
     , m_lineNumberArea(new QLineNumberArea(this))
-    , m_framedAttribute(new QFramedTextAttribute(this))
     , m_autoIndentation(true)
     , m_autoParentheses(true)
     , m_replaceTab(true)
     , m_tabReplace(QString(4, ' '))
 {
-    initDocumentLayoutHandlers();
     initFont();
     performConnections();
 
     m_highlighter->setTheme(QSourceHighlite::QSourceHighliter::Monokai);
     setStyleSheet("background-color: #272822;");
-}
-
-void QCodeEditor::initDocumentLayoutHandlers()
-{
-    document()
-        ->documentLayout()
-        ->registerHandler(
-            QFramedTextAttribute::type(),
-            m_framedAttribute);
 }
 
 void QCodeEditor::initFont()
@@ -105,7 +93,7 @@ void QCodeEditor::performConnections()
         this,
         &QTextEdit::selectionChanged,
         this,
-        &QCodeEditor::onSelectionChanged);
+        &QCodeEditor::updateExtraSelection);
 }
 
 void QCodeEditor::initCodeLangs()
@@ -131,36 +119,6 @@ void QCodeEditor::updateStyle()
     }
 
     updateExtraSelection();
-}
-
-void QCodeEditor::onSelectionChanged()
-{
-    auto selected = textCursor().selectedText();
-
-    auto cursor = textCursor();
-
-    // Cursor is null if setPlainText was called.
-    if (cursor.isNull())
-    {
-        return;
-    }
-
-    cursor.movePosition(QTextCursor::MoveOperation::Left);
-    cursor.select(QTextCursor::SelectionType::WordUnderCursor);
-
-    QSignalBlocker blocker(this);
-    m_framedAttribute->clear(cursor);
-
-    if (selected.size() > 1 &&
-        cursor.selectedText() == selected)
-    {
-        auto backup = textCursor();
-
-        // Perform search selecting
-        handleSelectionQuery(cursor);
-
-        setTextCursor(backup);
-    }
 }
 
 void QCodeEditor::updateFont(const QString& fontName)
@@ -221,17 +179,25 @@ void QCodeEditor::updateLineNumberArea(const QRect& rect)
     }
 }
 
-void QCodeEditor::handleSelectionQuery(const QTextCursor& cursor)
+void QCodeEditor::handleSelectionQuery(QList<QTextEdit::ExtraSelection>& extra)
 {
+    auto searchIterator = textCursor();
+    if (!searchIterator.hasSelection())
+        return;
 
-    auto searchIterator = cursor;
-    searchIterator.movePosition(QTextCursor::Start);
-    searchIterator = document()->find(cursor.selectedText(), searchIterator);
-    while (searchIterator.hasSelection())
+    QTextCharFormat fmt;
+    fmt.setBackground(QColor(255, 255, 255, 70));
+    fmt.setForeground(QColor(255, 255, 255));
+    QTextCursor cur = textCursor();
+    cur = document()->find(searchIterator.selectedText());
+
+    while (cur.hasSelection())
     {
-        m_framedAttribute->frame(searchIterator);
-
-        searchIterator = document()->find(cursor.selectedText(), searchIterator);
+        QTextEdit::ExtraSelection sel;
+        sel.cursor = cur;
+        sel.format = fmt;
+        extra.append(sel);
+        cur = document()->find(searchIterator.selectedText(), cur);
     }
 }
 
@@ -241,6 +207,7 @@ void QCodeEditor::updateExtraSelection()
 
     highlightCurrentLine(extra);
     highlightParenthesis(extra);
+    handleSelectionQuery(extra);
 
     setExtraSelections(extra);
 }
