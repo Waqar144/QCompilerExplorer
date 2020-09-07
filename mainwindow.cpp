@@ -45,6 +45,11 @@ MainWindow::MainWindow(QWidget* parent)
         ui->languagesComboBox->setDisabled(true);
         loadLocalCompilers();
     }
+    bool showFileBrowser = settings.value("showFileBrowser", true).toBool();
+    ui->actionFileBrowser->setChecked(showFileBrowser);
+    if (!showFileBrowser) {
+        ui->fileListWidget->hide();
+    }
 }
 
 MainWindow::~MainWindow()
@@ -281,4 +286,13 @@ void MainWindow::onActionOpenFoldertriggered()
             ui->fileListWidget->addItem(item);
         }
     }
+}
+
+void MainWindow::on_actionFileBrowser_triggered(bool checked)
+{
+    if (!checked)
+        ui->fileListWidget->hide();
+    else
+        ui->fileListWidget->show();
+    QSettings().setValue("showFileBrowser", checked);
 }
