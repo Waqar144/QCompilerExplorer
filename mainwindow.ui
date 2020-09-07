@@ -14,7 +14,7 @@
    <string>QCompilerExplorer</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
+   <iconset>
     <normaloff>:/icon.ico</normaloff>:/icon.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -79,7 +79,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <item>
-       <widget class="QListWidget" name="fileListWidget">
+       <widget class="FileListWidget" name="fileListWidget">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -196,9 +196,12 @@
    <extends>QLineEdit</extends>
    <header location="global">widgets/argslineedit.h</header>
   </customwidget>
+  <customwidget>
+   <class>FileListWidget</class>
+   <extends>QListWidget</extends>
+   <header location="global">widgets/filelistwidget.h</header>
+  </customwidget>
  </customwidgets>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

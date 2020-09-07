@@ -114,7 +114,9 @@ void MainWindow::initConnections()
     connect(ui->compileButton, &QPushButton::clicked, this, &MainWindow::on_compileButtonPress);
     connect(ui->compileButton, &QPushButton::clicked, this, &MainWindow::on_compileButton_clicked);
     connect(ui->actionOpen_Folder, &QAction::triggered, this, &MainWindow::onActionOpenFoldertriggered);
-    connect(ui->fileListWidget, &QListWidget::currentItemChanged, this, &MainWindow::selectedFileChanged);
+    connect(ui->fileListWidget, &QListWidget::itemClicked, this, [this](QListWidgetItem *item){
+        this->selectedFileChanged(item, nullptr);
+    });
 }
 
 void MainWindow::loadLocalCompilers()
@@ -271,7 +273,9 @@ void MainWindow::onActionOpenFoldertriggered()
     const QString path = QSettings().value(
                 QStringLiteral("defaultOpenFolderPath"), QDir::homePath()).toString();
     const QString dir = QFileDialog::getExistingDirectory(
-                this, QStringLiteral("Open Folder..."), path);
+                this, QStringLiteral("Open Folder..."), path,
+                QFileDialog::ShowDirsOnly | QFileDialog::ReadOnly);
+
     if (dir.isEmpty()) {
         return;
     }

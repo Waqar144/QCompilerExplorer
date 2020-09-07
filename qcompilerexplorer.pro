@@ -28,13 +28,14 @@ SOURCES += \
     compilerservice.cpp \
     main.cpp \
     settingsdialog.cpp \
-    widgets/QCodeEditor.cpp \
-    widgets/QLineNumberArea.cpp \
     asmtextedit.cpp \
     mainwindow.cpp \
     QSourceHighlite/qsourcehighliter.cpp \
     QSourceHighlite/languagedata.cpp \
     QSourceHighlite/qsourcehighliterthemes.cpp \
+    widgets/QCodeEditor.cpp \
+    widgets/QLineNumberArea.cpp \
+    widgets/filelistwidget.cpp \
     widgets/argslineedit.cpp
 
 HEADERS += \
@@ -44,13 +45,14 @@ HEADERS += \
     compiler.h \
     compilerservice.h \
     settingsdialog.h \
-    widgets/QCodeEditor.h \
-    widgets/QLineNumberArea.h \
     asmtextedit.h \
     mainwindow.h \
     QSourceHighlite/qsourcehighliter.h \
     QSourceHighlite/languagedata.h \
     QSourceHighlite/qsourcehighliterthemes.h \
+    widgets/QCodeEditor.h \
+    widgets/QLineNumberArea.h \
+    widgets/filelistwidget.h \
     widgets/argslineedit.h
 
 FORMS += \
