@@ -266,7 +266,10 @@ void MainWindow::selectedFileChanged(QListWidgetItem *current, QListWidgetItem*)
 
 void MainWindow::onActionOpenFoldertriggered()
 {
-    const QString dir = QFileDialog::getExistingDirectory(this, "Open Folder...", QDir::homePath());
+    const QString path = QSettings().value(
+                QStringLiteral("defaultOpenFolderPath"), QDir::homePath()).toString();
+    const QString dir = QFileDialog::getExistingDirectory(
+                this, QStringLiteral("Open Folder..."), path);
     if (dir.isEmpty()) {
         return;
     }
