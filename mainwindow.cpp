@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget* parent)
     split = new QSplitter();
     split->addWidget(ui->codeTextEdit);
     split->addWidget(ui->asmTextEdit);
-    ui->centralwidget->layout()->addWidget(split);
+    ui->horizontalLayout_4->layout()->addWidget(split);
 
     QSettings settings;
     auto isIntel = settings.value(QStringLiteral("intelSyntax")).toBool();
