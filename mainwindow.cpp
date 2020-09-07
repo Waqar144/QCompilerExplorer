@@ -208,7 +208,11 @@ void MainWindow::on_compileButtonPress()
     }();
 
     const Compiler compiler(std::move(compilerName));
-    std::pair<QString, bool> out = compiler.compileToAsm(source, argsList, intelSyntax);
+    QString currentFile =
+            ui->fileListWidget->currentItem() != nullptr ?
+                ui->fileListWidget->currentItem()->data(Qt::UserRole).toString() : QString();
+    qDebug () << "Current File: " << currentFile;
+    std::pair<QString, bool> out = compiler.compileToAsm(source, argsList, intelSyntax, currentFile);
 
     if (out.second) {
         AsmParser p;
@@ -262,6 +266,10 @@ void MainWindow::onActionOpenFoldertriggered()
 {
     QString path = QDir::homePath() + "/Projects/";
     const QString dir = QFileDialog::getExistingDirectory(this, "Open Folder...", path);
+    if (dir.isEmpty()) {
+        return;
+    }
+    ui->fileListWidget->clear();
     const QDir d{dir};
     const auto fileInfos = d.entryInfoList(QDir::Files);
 

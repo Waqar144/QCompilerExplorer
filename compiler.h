@@ -12,8 +12,9 @@ public:
     static bool isCompilerAvailable(const QString& compiler);
 
     std::pair<QString, bool> compileToAsm(const QString& source,
-                                             QStringList args,
-                                             bool intelSyntax) const;
+                                          QStringList args,
+                                          bool intelSyntax,
+                                          const QString filePath) const;
 private:
     QString m_compiler;
 };
