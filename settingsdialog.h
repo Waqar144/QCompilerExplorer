@@ -26,6 +26,8 @@ private slots:
 
     void on_SettingsDialog_accepted();
 
+    void on_defaultPathBrowseButton_clicked();
+
 private:
     Ui::SettingsDialog *ui;
 };

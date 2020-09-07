@@ -2,6 +2,7 @@
 #include "ui_settingsdialog.h"
 
 #include <QSettings>
+#include <QFileDialog>
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
     QDialog(parent),
@@ -34,4 +35,11 @@ void SettingsDialog::on_SettingsDialog_accepted()
     QSettings settings;
     settings.setValue(QStringLiteral("fontSize"), ui->spinBox->value());
     settings.setValue(QStringLiteral("font"), ui->fontComboBox->currentFont().family());
+    settings.setValue(QStringLiteral("defaultOpenFolderPath"), ui->defaultPathLineEdit->text());
+}
+
+void SettingsDialog::on_defaultPathBrowseButton_clicked()
+{
+    const QString path = QFileDialog::getExistingDirectory(this, "Choose Path");
+    ui->defaultPathLineEdit->setText(path);
 }
