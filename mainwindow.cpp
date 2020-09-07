@@ -258,7 +258,6 @@ void MainWindow::saveToFile()
 void MainWindow::selectedFileChanged(QListWidgetItem *current, QListWidgetItem*)
 {
     QString filePath = current->data(Qt::UserRole).toString();
-    qDebug () << "File: " << filePath;
     QFile f{filePath};
     if (f.open(QFile::ReadOnly)) {
         ui->codeTextEdit->setPlainText(f.readAll());

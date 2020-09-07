@@ -83,8 +83,6 @@ std::pair<QString, bool> Compiler::compileToAsm(const QString &source,
 
     argsList.append(fileName);
 
-    qDebug () << "ARGS: " << argsList;
-
     QProcess p;
     p.setProgram(m_compiler);
     p.setArguments(argsList);
@@ -104,7 +102,6 @@ std::pair<QString, bool> Compiler::compileToAsm(const QString &source,
 
     QFileInfo fi{filePath};
     QString asmFile = filePath.isEmpty() ? "./x.s" : fi.baseName() + ".s";
-    qDebug () << "Asm output file: " << fi.baseName() + ".s";
 
     QFile file(asmFile);
     if (file.open(QFile::ReadOnly)) {
