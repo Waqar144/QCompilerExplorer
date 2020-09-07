@@ -3,6 +3,7 @@
 #include <QTextStream>
 #include <QDebug>
 #include <QRegularExpression>
+#include <array>
 
 #include <cxxabi.h>
 
@@ -34,7 +35,7 @@ QString AsmParser::process(const QByteArray &asmText)
     QRegularExpression hasOpcodeRe { QStringLiteral("^\\s*[a-zA-Z]") };
     QRegularExpression numericLabelsRe { QStringLiteral("\\s*[0-9]:") };
 
-    const QVector<QString> allowedDirectives =
+    const std::array<QString, 7> allowedDirectives =
     {
         QStringLiteral(".string"),
         QStringLiteral(".ascii"),
