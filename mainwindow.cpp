@@ -30,6 +30,8 @@ MainWindow::MainWindow(QWidget* parent)
     split->addWidget(ui->asmTextEdit);
     ui->horizontalLayout_4->layout()->addWidget(split);
 
+    setWindowIcon(QIcon{":/qce.png"});
+
     QSettings settings;
     const auto isIntel = settings.value(QStringLiteral("intelSyntax")).toBool();
     ui->isIntelSyntax->setChecked(isIntel);
