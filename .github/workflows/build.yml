@@ -12,13 +12,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-18.04, ubuntu-latest, macos-latest, windows-latest]
         # https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/
-        qt-version: ['5.13.2', '5.15.0']
+        qt-version: ['5.3.0', '5.13.2', '5.15.0']
         exclude:
           # win64_mingw73 not found
           - os: windows-latest
             qt-version: '5.15.0'
+          - os: windows-latest
+            qt-version: '5.3.0'
     steps:
     - uses: actions/checkout@v2
       with:
