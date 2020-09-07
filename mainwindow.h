@@ -42,7 +42,6 @@ private:
 private:
     Ui::MainWindow *ui;
     QSplitter* split;
-//    AsmHighlighter* asmHighlighter;
 
     // QWidget interface
 };
