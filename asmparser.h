@@ -3,10 +3,8 @@
 
 #include <QByteArray>
 
-class AsmParser
+namespace AsmParser
 {
-public:
-    AsmParser() = default;
     QString process(const QByteArray& asmText);
     QString demangle(QString&& asmText);
 };
