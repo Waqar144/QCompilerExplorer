@@ -4,6 +4,7 @@
 #include <QProcess>
 #include <QDebug>
 #include <QRegularExpression>
+#include <QFileInfo>
 
 Compiler::Compiler(QString compiler)
     : m_compiler{std::move(compiler)}
@@ -62,20 +63,27 @@ QString Compiler::getCompilerVersion(const QString& compiler)
  */
 std::pair<QString, bool> Compiler::compileToAsm(const QString &source,
                                                 QStringList args,
-                                                bool intelSyntax) const
+                                                bool intelSyntax,
+                                                const QString filePath) const
 {
-    QString fileName {QStringLiteral("./x.cpp")};
-    QFile f(fileName);
-    if (f.open(QFile::ReadWrite | QFile::Truncate | QFile::Unbuffered)) {
-        f.write(source.toUtf8());
-        f.waitForBytesWritten(3000);
+    QString fileName = filePath;
+    if (filePath.isEmpty()) {
+        fileName = QStringLiteral("./x.cpp");
+        QFile f(fileName);
+        if (f.open(QFile::ReadWrite | QFile::Truncate | QFile::Unbuffered)) {
+            f.write(source.toUtf8());
+            f.waitForBytesWritten(3000);
+        }
     }
 
     QStringList argsList = getArgs(std::move(args));
     if (intelSyntax) {
         argsList.append(QStringLiteral("-masm=intel"));
     }
+
     argsList.append(fileName);
+
+    qDebug () << "ARGS: " << argsList;
 
     QProcess p;
     p.setProgram(m_compiler);
@@ -94,7 +102,11 @@ std::pair<QString, bool> Compiler::compileToAsm(const QString &source,
         }
     }
 
-    QFile file("./x.s");
+    QFileInfo fi{filePath};
+    QString asmFile = filePath.isEmpty() ? "./x.s" : fi.baseName() + ".s";
+    qDebug () << "Asm output file: " << fi.baseName() + ".s";
+
+    QFile file(asmFile);
     if (file.open(QFile::ReadOnly)) {
         return {file.readAll(), true};
     } else {
