@@ -16,7 +16,7 @@ public:
                                           bool intelSyntax,
                                           const QString filePath) const;
 private:
-    QString m_compiler;
+    const QString m_compiler;
 };
 
 #endif // COMPILER_H

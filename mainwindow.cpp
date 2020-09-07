@@ -31,13 +31,13 @@ MainWindow::MainWindow(QWidget* parent)
     ui->horizontalLayout_4->layout()->addWidget(split);
 
     QSettings settings;
-    auto isIntel = settings.value(QStringLiteral("intelSyntax")).toBool();
+    const auto isIntel = settings.value(QStringLiteral("intelSyntax")).toBool();
     ui->isIntelSyntax->setChecked(isIntel);
 
     restoreGeometry(settings.value(QStringLiteral("geometry")).toByteArray());
     restoreState(settings.value(QStringLiteral("windowState")).toByteArray());
 
-    bool isLocal = settings.value(QStringLiteral("localCE"), true).toBool();
+    const bool isLocal = settings.value(QStringLiteral("localCE"), true).toBool();
     if (!isLocal) {
         CompilerExplorerSvc::instance()->sendRequest(QCompilerExplorer::Endpoints::Languages);
     } else {
@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget* parent)
         ui->languagesComboBox->setDisabled(true);
         loadLocalCompilers();
     }
-    bool showFileBrowser = settings.value("showFileBrowser", true).toBool();
+    const bool showFileBrowser = settings.value("showFileBrowser", true).toBool();
     ui->actionFileBrowser->setChecked(showFileBrowser);
     if (!showFileBrowser) {
         ui->fileListWidget->hide();
@@ -64,7 +64,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupLanguages(const QByteArray& data)
 {
-    QSettings settings;
     const QJsonArray json = QJsonDocument::fromJson(data).array();
     ui->languagesComboBox->blockSignals(true);
     for (const auto& value : json) {
@@ -72,13 +71,12 @@ void MainWindow::setupLanguages(const QByteArray& data)
         ui->languagesComboBox->addItem(lang, value[QStringLiteral("id")].toString());
     }
     ui->languagesComboBox->blockSignals(false);
-    auto lang = settings.value(QStringLiteral("lastUsedLanguage")).toString();
+    const auto lang = QSettings().value(QStringLiteral("lastUsedLanguage")).toString();
     ui->languagesComboBox->setCurrentText(lang);
 }
 
 void MainWindow::updateCompilerComboBox(const QByteArray& data)
 {
-    QSettings settings;
     const QJsonArray json = QJsonDocument::fromJson(data).array();
     ui->compilerComboBox->blockSignals(true);
     for (const auto& value : json) {
@@ -86,7 +84,8 @@ void MainWindow::updateCompilerComboBox(const QByteArray& data)
         ui->compilerComboBox->addItem(compiler, value["id"].toString());
     }
     ui->compilerComboBox->blockSignals(false);
-    auto compiler = settings.value(QStringLiteral("lastUsedCompilerFor") + ui->languagesComboBox->currentText()).toString();
+    auto compiler = QSettings().value(QStringLiteral("lastUsedCompilerFor") +
+                                   ui->languagesComboBox->currentText()).toString();
     ui->compilerComboBox->setCurrentText(compiler);
 }
 
@@ -94,6 +93,7 @@ void MainWindow::updateAsmTextEdit(const QByteArray& data)
 {
     const QJsonArray assembly = QJsonDocument::fromJson(data).object().value(QStringLiteral("asm")).toArray();
     QString asmText;
+    asmText.reserve(assembly.size());
     for (const auto& line : assembly) {
         asmText.append(line["text"].toString() + QLatin1Char('\n'));
     }
@@ -122,8 +122,8 @@ void MainWindow::loadLocalCompilers()
     //clear previous things in combobox
     ui->compilerComboBox->clear();
     //check compiler availability and populate the combobox
-    QString gpp = QStringLiteral("g++");
-    QString clang = QStringLiteral("clang++");
+    const QString gpp{QStringLiteral("g++")};
+    const QString clang{QStringLiteral("clang++")};
     if (Compiler::isCompilerAvailable(gpp)) {
         const QString version = Compiler::getCompilerVersion(gpp);
         ui->compilerComboBox->addItem(gpp + QLatin1Char(' ') + version, gpp);
@@ -142,8 +142,7 @@ void MainWindow::on_languagesComboBox_currentIndexChanged(const QString& arg1)
     CompilerExplorerSvc::instance()->sendRequest(QCompilerExplorer::Endpoints::Compilers, languageId);
     ui->codeTextEdit->setCurrentLanguage(language);
     ui->compilerComboBox->clear();
-    QSettings settings;
-    settings.setValue(QStringLiteral("lastUsedLanguage"), arg1);
+    QSettings().setValue(QStringLiteral("lastUsedLanguage"), arg1);
 }
 
 void MainWindow::on_compileButton_clicked()
@@ -156,10 +155,10 @@ void MainWindow::on_compileButton_clicked()
     }
     const QString text = ui->codeTextEdit->toPlainText();
     const QString args = ui->argsLineEdit->text();
-    bool isIntel = ui->isIntelSyntax->isChecked();
+    const bool isIntel = ui->isIntelSyntax->isChecked();
     auto data = CompilerExplorerSvc::getCompilationOptions(text, args, isIntel);
 
-    QString endpoint = QStringLiteral("compiler/") +
+    const QString endpoint = QStringLiteral("compiler/") +
             ui->compilerComboBox->currentData().toString() + QStringLiteral("/compile");
     CompilerExplorerSvc::instance()->compileRequest(endpoint, data.toJson());
 }
@@ -201,7 +200,7 @@ void MainWindow::on_compileButtonPress()
         return;
 
     const QString source = ui->codeTextEdit->toPlainText();
-    auto compilerName = ui->compilerComboBox->currentData().toString();
+    const auto compilerName = ui->compilerComboBox->currentData().toString();
     const bool intelSyntax = ui->isIntelSyntax->isChecked();
     const QString args = ui->argsLineEdit->text();
     const QStringList argsList = [&args]() -> QStringList
@@ -213,16 +212,15 @@ void MainWindow::on_compileButtonPress()
     }();
 
     const Compiler compiler(std::move(compilerName));
-    QString currentFile =
+    const QString currentFile =
             ui->fileListWidget->currentItem() != nullptr ?
                 ui->fileListWidget->currentItem()->data(Qt::UserRole).toString() : QString();
-    qDebug () << "Current File: " << currentFile;
+
     std::pair<QString, bool> out = compiler.compileToAsm(source, argsList, intelSyntax, currentFile);
 
     if (out.second) {
-        AsmParser p;
-        QString demangled = p.demangle(std::move(out.first));
-        QString cleanAsm = p.process(demangled.toUtf8());
+        const QString demangled = AsmParser::demangle(std::move(out.first));
+        const QString cleanAsm = AsmParser::process(demangled.toUtf8());
         ui->asmTextEdit->setPlainText(cleanAsm);
     } else {
         ui->asmTextEdit->setPlainText(QStringLiteral("<Compilation Failed>\n") + out.first);
@@ -243,7 +241,7 @@ void MainWindow::on_localCheckbox_stateChanged(int state)
 void MainWindow::saveToFile()
 {
     auto action = sender();
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save As..."));
+    const QString fileName = QFileDialog::getSaveFileName(this, tr("Save As..."));
     QFile file(fileName);
     file.open(QIODevice::WriteOnly);
     QTextStream s(&file);
@@ -257,7 +255,7 @@ void MainWindow::saveToFile()
 
 void MainWindow::selectedFileChanged(QListWidgetItem *current, QListWidgetItem*)
 {
-    QString filePath = current->data(Qt::UserRole).toString();
+    const QString filePath = current->data(Qt::UserRole).toString();
     QFile f{filePath};
     if (f.open(QFile::ReadOnly)) {
         ui->codeTextEdit->setPlainText(f.readAll());
@@ -268,8 +266,7 @@ void MainWindow::selectedFileChanged(QListWidgetItem *current, QListWidgetItem*)
 
 void MainWindow::onActionOpenFoldertriggered()
 {
-    QString path = QDir::homePath() + "/Projects/";
-    const QString dir = QFileDialog::getExistingDirectory(this, "Open Folder...", path);
+    const QString dir = QFileDialog::getExistingDirectory(this, "Open Folder...", QDir::homePath());
     if (dir.isEmpty()) {
         return;
     }
