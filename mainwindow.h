@@ -4,9 +4,7 @@
 #include <QMainWindow>
 #include <QSplitter>
 
-#include "QSourceHighlite/qsourcehighliter.h"
-
-#include "asmhighlighter.h"
+class QListWidgetItem;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -32,6 +30,8 @@ private slots:
     void on_compileButtonPress();
     void on_localCheckbox_stateChanged(int arg1);
     void saveToFile();
+    void selectedFileChanged(QListWidgetItem *current, QListWidgetItem *previous);
+    void onActionOpenFoldertriggered();
 
 private:
     void initConnections();
@@ -40,7 +40,7 @@ private:
 private:
     Ui::MainWindow *ui;
     QSplitter* split;
-    AsmHighlighter* asmHighlighter;
+//    AsmHighlighter* asmHighlighter;
 
     // QWidget interface
 };

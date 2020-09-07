@@ -106,6 +106,8 @@ void MainWindow::initConnections()
     connect(ui->actionSave_code_to_file, &QAction::triggered, this, &MainWindow::saveToFile);
     connect(ui->compileButton, &QPushButton::clicked, this, &MainWindow::on_compileButtonPress);
     connect(ui->compileButton, &QPushButton::clicked, this, &MainWindow::on_compileButton_clicked);
+    connect(ui->actionOpen_Folder, &QAction::triggered, this, &MainWindow::onActionOpenFoldertriggered);
+    connect(ui->fileListWidget, &QListWidget::currentItemChanged, this, &MainWindow::selectedFileChanged);
 }
 
 void MainWindow::loadLocalCompilers()
@@ -242,4 +244,33 @@ void MainWindow::saveToFile()
         s << ui->codeTextEdit->toPlainText();
     }
     file.close();
+}
+
+void MainWindow::selectedFileChanged(QListWidgetItem *current, QListWidgetItem*)
+{
+    QString filePath = current->data(Qt::UserRole).toString();
+    qDebug () << "File: " << filePath;
+    QFile f{filePath};
+    if (f.open(QFile::ReadOnly)) {
+        ui->codeTextEdit->setPlainText(f.readAll());
+    } else {
+        qWarning() << "Unable to  open file";
+    }
+}
+
+void MainWindow::onActionOpenFoldertriggered()
+{
+    QString path = QDir::homePath() + "/Projects/";
+    const QString dir = QFileDialog::getExistingDirectory(this, "Open Folder...", path);
+    const QDir d{dir};
+    const auto fileInfos = d.entryInfoList(QDir::Files);
+
+    //load the cpp files found in the directory into fileListWidget
+    for (const auto& file : fileInfos) {
+        if (file.suffix() == "cpp") {
+            QListWidgetItem *item = new QListWidgetItem(file.fileName());
+            item->setData(Qt::UserRole, file.filePath());
+            ui->fileListWidget->addItem(item);
+        }
+    }
 }

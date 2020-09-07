@@ -129,7 +129,7 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="separator"/>
+    <addaction name="actionOpen_Folder"/>
     <addaction name="actionSave_asm_to_file"/>
     <addaction name="actionSave_code_to_file"/>
    </widget>
@@ -160,8 +160,16 @@
    </property>
   </action>
   <action name="actionFileBrowser">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>FileBrowser</string>
+   </property>
+  </action>
+  <action name="actionOpen_Folder">
+   <property name="text">
+    <string>Open Folder...</string>
    </property>
   </action>
  </widget>
