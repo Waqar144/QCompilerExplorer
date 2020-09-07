@@ -33,6 +33,8 @@ private slots:
     void selectedFileChanged(QListWidgetItem *current, QListWidgetItem *previous);
     void onActionOpenFoldertriggered();
 
+    void on_actionFileBrowser_triggered(bool checked);
+
 private:
     void initConnections();
     void loadLocalCompilers();
