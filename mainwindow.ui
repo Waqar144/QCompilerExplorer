@@ -166,6 +166,9 @@
    <property name="text">
     <string>FileBrowser</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
+   </property>
   </action>
   <action name="actionOpen_Folder">
    <property name="text">
