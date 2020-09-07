@@ -8,6 +8,7 @@ int main(int argc, char *argv[])
 
     a.setOrganizationName(QString("Waqar144"));
     a.setApplicationName("QCompilerExplorer");
+    a.setWindowIcon(QIcon(":/icon.ico"));
 
     MainWindow w;
     w.show();
