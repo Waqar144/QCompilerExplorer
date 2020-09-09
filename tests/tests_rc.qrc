@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>qce.png</file>
+        <file>data/test1.s</file>
     </qresource>
 </RCC>
