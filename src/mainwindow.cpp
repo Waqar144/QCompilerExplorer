@@ -114,9 +114,7 @@ void MainWindow::initConnections()
     connect(ui->compileButton, &QPushButton::clicked, this, &MainWindow::on_compileButtonPress);
     connect(ui->compileButton, &QPushButton::clicked, this, &MainWindow::on_compileButton_clicked);
     connect(ui->actionOpen_Folder, &QAction::triggered, this, &MainWindow::onActionOpenFoldertriggered);
-    connect(ui->fileListWidget, &QListWidget::itemClicked, this, [this](QListWidgetItem *item){
-        this->selectedFileChanged(item, nullptr);
-    });
+    connect(ui->fileListWidget, &FileListWidget::selectedFileChanged, this, &MainWindow::onselectedFileChanged);
 }
 
 void MainWindow::loadLocalCompilers()
@@ -257,9 +255,8 @@ void MainWindow::saveToFile()
     file.close();
 }
 
-void MainWindow::selectedFileChanged(QListWidgetItem *current, QListWidgetItem*)
+void MainWindow::onselectedFileChanged(const QString& filePath)
 {
-    const QString filePath = current->data(Qt::UserRole).toString();
     QFile f{filePath};
     if (f.open(QFile::ReadOnly)) {
         ui->codeTextEdit->setPlainText(f.readAll());

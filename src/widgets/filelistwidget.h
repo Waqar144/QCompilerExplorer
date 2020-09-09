@@ -12,6 +12,11 @@ public:
     // QWidget interface
 protected:
     void mousePressEvent(QMouseEvent *event) override;
+private slots:
+    void onItemClicked(QListWidgetItem *current);
+
+signals:
+    void selectedFileChanged(const QString& filePath);
 };
 
 #endif // FILELISTWIDGET_H

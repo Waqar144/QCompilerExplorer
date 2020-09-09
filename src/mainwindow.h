@@ -30,7 +30,7 @@ private slots:
     void on_compileButtonPress();
     void on_localCheckbox_stateChanged(int arg1);
     void saveToFile();
-    void selectedFileChanged(QListWidgetItem *current, QListWidgetItem *previous);
+    void onselectedFileChanged(const QString &filePath);
     void onActionOpenFoldertriggered();
 
     void on_actionFileBrowser_triggered(bool checked);
