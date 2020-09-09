@@ -145,10 +145,31 @@ QString AsmParser::process(const QByteArray &asmText)
         QString line = finalOut.readLine();
 
         //no indentation if it is a label
-        int colonPos = line.indexOf(':');
-        if (colonPos > -1 && colonPos + 1 < line.length() && line[colonPos + 1] != ':') {
-            output.append(line).append('\n');
-            continue;
+        int colonPos = line.lastIndexOf(':');
+        if (colonPos > -1) {
+            //we are at the end of the line, it is a label
+            if (colonPos >= line.length() - 1) {
+                output.append(line).append('\n');
+                continue;
+            }
+
+            //traverse the line and make sure it is a label
+            //it can't be a label sometimes because there maybe a ':' inside the line
+            bool isLabel = true;
+            int i{};
+            for (i = colonPos + 1; i < line.length(); ++i) {
+                if (!line.at(i).isSpace()) {
+                    isLabel = false;
+                    break;
+                }
+            }
+
+            //it is a label, but has a comment
+            //this *may* result in a bug someday if there is a string with a ": #" pattern
+            if (!isLabel && line.at(i) == '#') {
+                output.append(line).append('\n');
+                continue;
+            }
         }
 
         if (maxOpcodeLen == 4) {
