@@ -161,6 +161,9 @@ QString AsmParser::process(const QByteArray &asmText)
             line.replace(QLatin1Char('\t'), QStringLiteral("\t\t"));
         }
 
+        //remove @PLT
+        line.replace(QStringLiteral("@PLT"), QLatin1String(""));
+
         line.prepend('\t').append('\n');
         output.append(line);
     }
