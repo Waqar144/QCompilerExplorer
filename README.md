@@ -1,6 +1,8 @@
 # QCompilerExplorer
 
-Just made this as a fun project. It includes a local mini compiler explorer, which will show you the assembly generated for your C++ code using g++(if g++ is installed). It also includes a frontend for the [Compiler Explorer](https://godbolt.org). You can use either one of them.
+Just made this as a fun project. It includes a local mini compiler explorer, which will show you the assembly generated for your C++ code using g++ / clang. It also includes a frontend for the [Compiler Explorer](https://godbolt.org). You can use either one of them.
+
+You can open a folder(project folder) and browse your code and it's generated asm side by side (in development).
 
 ## Screenshot
 
@@ -26,10 +28,10 @@ make
 
 ## Missing stuff
 
-- Linking to libraries is not supported for the godbolt frontend. You can link to libraries if you use the local asm generator.
-- Written for g++. Works with clang but the output is not as clean
-- Asm parsing / cleaning is not very good yet, so there is some noise always
-- Will not work on windows in its current state
+- Linking to libraries is not supported for the godbolt frontend. You can link to libraries if you use the local asm generator. (I may remove the godbolt frontend altogether since it doesn't seem very useful)
+- Asm parsing / cleaning is not the best
+- Highlighter struggles at times
+- Has not been tested on windows at all
 - No binary execution / output of program
 
 ## LICENSE
