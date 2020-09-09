@@ -145,7 +145,8 @@ QString AsmParser::process(const QByteArray &asmText)
         QString line = finalOut.readLine();
 
         //no indentation if it is a label
-        if (line.endsWith(':') || line.contains(':')) {
+        int colonPos = line.indexOf(':');
+        if (colonPos > -1 && colonPos + 1 < line.length() && line[colonPos + 1] != ':') {
             output.append(line).append('\n');
             continue;
         }
