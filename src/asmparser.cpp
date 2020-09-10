@@ -56,6 +56,41 @@ static void markLabelsUsed(const QVector<QStringRef>& lines, LabelsHashmap& allL
     }
 }
 
+/**
+ * @brief merges the following:
+ * Source Line: 4
+ * Source Line: 5
+ * into:
+ * Source Line: 4 - 5
+ * @param cleanedLines
+ */
+static void mergeAnnotatedLineNums(QStringList& lines)
+{
+    for (int i = 0; i < lines.size(); ++i) {
+        if (lines.at(i).startsWith("\tSource Line: ")) {
+            QString cur = lines.at(i);
+            qDebug() << lines.at(i);
+            int j;
+            for (j = i + 1; j < lines.size(); ++j) {
+                if (lines.at(j) != '\t' && !lines.at(j).startsWith("\tSource Line: "))
+                    break;
+            }
+            if (j > 0) --j;
+            if (j != i && lines.at(j).startsWith("\tSource Line: ")) {
+                int numPos = lines.at(j).lastIndexOf(' ') + 1;
+                if (numPos == - 1)
+                    continue;
+                int num = lines.at(j).midRef(numPos, lines.at(j).size()).toInt();
+                lines[i].append(" - " + QString::number(num));
+            }
+            //collapse all the lines from i -> j
+            for (int k = i + 1; k < j + 1; ++k)
+                lines[k] = "";
+        }
+    }
+    lines.removeAll("");
+}
+
 QString AsmParser::process(const QString &asmText)
 {
     QString output;
@@ -108,6 +143,7 @@ QString AsmParser::process(const QString &asmText)
     int maxOpcodeLen = 4;
 
     QString currentLabel;
+    int prevLineNum = -1;
     //3 Remove unused labels from the asm
     for (const auto& line : allLines) {
         if (labelRe.match(line).hasMatch()) {
@@ -123,7 +159,11 @@ QString AsmParser::process(const QString &asmText)
 
         if (directiveRe.match(line).hasMatch()) {
             if (line.trimmed().startsWith(".loc ")) {
-                output += "\nSource Line: " + QString::number(getLineNumber(line)) + "\n";
+                int lineNum = getLineNumber(line);
+                if (prevLineNum != lineNum) {
+                    output += "\nSource Line: " + QString::number(lineNum) + "\n";
+                    prevLineNum = lineNum;
+                }
             }
             //if we are in a label
             if (!currentLabel.isEmpty()) {
@@ -203,7 +243,10 @@ QString AsmParser::process(const QString &asmText)
         line.replace(QStringLiteral("@PLT"), QLatin1String(""));
         line.prepend('\t');
     }
+    mergeAnnotatedLineNums(cleanedLines);
     output = cleanedLines.join('\n');
+
+
 
     return output;
 }
