@@ -221,8 +221,8 @@ void MainWindow::on_compileButtonPress()
     std::pair<QString, bool> out = compiler.compileToAsm(source, argsList, intelSyntax, currentFile);
 
     if (out.second) {
-        const QString demangled = AsmParser::demangle(std::move(out.first));
-        const QString cleanAsm = AsmParser::process(demangled.toUtf8());
+        QString demangled = AsmParser::demangle(std::move(out.first));
+        const QString cleanAsm = AsmParser::process(demangled);
         ui->asmTextEdit->setPlainText(cleanAsm);
     } else {
         ui->asmTextEdit->setPlainText(QStringLiteral("<Compilation Failed>\n") + out.first);

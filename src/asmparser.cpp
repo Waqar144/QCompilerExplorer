@@ -7,33 +7,64 @@
 
 #include <cxxabi.h>
 
+using LabelsHashmap = QHash<QStringRef, bool>;
+
 static bool isOpcodeLen4orMore(const QString& line)
 {
     int pos = line.indexOf(QLatin1Char('\t'));
     return pos > 4;
 }
 
-static int opcodeLen(const QString& line)
+static int opcodeLen(const QStringRef& line)
 {
     int tabPos = line.indexOf(QLatin1Char('\t'));
     return tabPos;
 }
 
-static int getLineNumber(const QString& line)
+static int getLineNumber(const QStringRef& line)
 {
-    return line.splitRef(' ').at(2).toInt();
+    return line.split(' ').at(2).toInt();
 }
 
-QString AsmParser::process(const QByteArray &asmText)
+static LabelsHashmap collectAllLabels(const QVector<QStringRef>& lines)
+{
+    static QRegularExpression labelRe { QStringLiteral("^\\.*[a-zA-Z0-9]+[_]*[0-9]+:$") };
+    LabelsHashmap labels;
+    for (const auto& line : lines) {
+        if (labelRe.match(line).hasMatch()) {
+            auto label = line.trimmed();
+            label.chop(1); // remove ':'
+            labels[label] = false;
+        }
+    }
+    return labels;
+}
+
+static void markLabelsUsed(const QVector<QStringRef>& lines, LabelsHashmap& allLabels)
+{
+    static QRegularExpression hasOpcodeRe { QStringLiteral("^\\s*[a-zA-Z]") };
+    for (const auto& line : lines) {
+        if (hasOpcodeRe.match(line).hasMatch()) {
+            QHashIterator<QStringRef, bool> i(allLabels);
+            while (i.hasNext()) {
+                auto label = i.next();
+                if (line.contains(label.key())) {
+                    allLabels[label.key()] = true;
+                }
+            }
+        }
+    }
+}
+
+QString AsmParser::process(const QString &asmText)
 {
     QString output;
     output.reserve(asmText.length());
-    QTextStream s(asmText);
 
     //1. collect all the labels
     //2. go through the asm line by line and check if the labels are used/unused
     //3. if the labels are unused, they get deleted
-    //4. every line beginning with '.' gets deleted, unless it is a used label
+    //4. every line beginning with '.' gets deleted, unless it is in a label
 
     QRegularExpression directiveRe { QStringLiteral("^\\s*\\..*$") };
     QRegularExpression labelRe { QStringLiteral("^\\.*[a-zA-Z0-9]+[_]*[0-9]+:$") };
@@ -51,80 +82,53 @@ QString AsmParser::process(const QByteArray &asmText)
         QStringLiteral(".quad")
     };
 
-    //<label, used>
-    QHash<QString, bool> labels;
+    const QVector<QStringRef> allLinesTemp = asmText.splitRef('\n');
+    //trim all Lines
+    QVector<QStringRef> allLines(allLinesTemp.size());
+    for (int i = 0; i < allLinesTemp.size(); ++i){
+        allLines[i] = allLinesTemp.at(i).trimmed();
+    }
 
     //1
-    while (!s.atEnd()) {
-        QString line = s.readLine();
-        if (labelRe.match(line).hasMatch()) {
-            auto label = line.trimmed();
-            label.chop(1); // remove ':'
-            labels[label] = false;
-        }
-    }
-
-    s.seek(0);
+    //<label, used>
+    QHash<QStringRef, bool> labels = collectAllLabels(allLines);
 
     //2
-    int lineCount = 0;
-    while(!s.atEnd()) {
-        ++lineCount;
-        QString line = s.readLine();
-        if (hasOpcodeRe.match(line).hasMatch()) {
-            QHashIterator<QString, bool> i(labels);
-            while (i.hasNext()) {
-                auto label = i.next();
-                if (line.contains(label.key())) {
-                    labels[label.key()] = true;
-                }
-            }
-        }
-    }
+    markLabelsUsed(allLines, labels);
 
-    //remove false labels from labels hash-map
-    auto labelsCopy = labels;
-    auto it = labelsCopy.constBegin();
-    for (; it != labelsCopy.constEnd(); ++it) {
-        if ( it.value() == false ) {
-            labels.remove(it.key());
-        }
+    //remove unused labels from labels hash-map
+    auto it = labels.begin();
+    while (it != labels.end()) {
+        if (it.value() == false)
+            labels.erase(it++);
+        else
+            ++it;
     }
-
-    s.seek(0);
 
     int maxOpcodeLen = 4;
 
-    QVector<QString> linesWithLoc;
-    linesWithLoc.reserve(lineCount);
     QString currentLabel;
-    //3
-    int asmLines = 0;
-    while(!s.atEnd()) {
-        QString line = s.readLine().trimmed();
-
+    //3 Remove unused labels from the asm
+    for (const auto& line : allLines) {
         if (labelRe.match(line).hasMatch()) {
             auto l = line;
             l.chop(1);
             currentLabel = "";
             if (labels.contains(l)) {
-                currentLabel = line;
+                currentLabel = line.toString();
                 output += line + "\n";
             }
             continue;
         }
 
         if (directiveRe.match(line).hasMatch()) {
-            if (line.startsWith(".loc ")) {
+            if (line.trimmed().startsWith(".loc ")) {
                 output += "\nSource Line: " + QString::number(getLineNumber(line)) + "\n";
-                linesWithLoc.append(line);
             }
             //if we are in a label
             if (!currentLabel.isEmpty()) {
                 for (const auto& allowed : allowedDirectives) {
                     if (line.trimmed().startsWith(allowed)) {
-                        asmLines++;
-                        linesWithLoc.append(line);
                         output += line + "\n";
                     }
                 }
@@ -141,9 +145,7 @@ QString AsmParser::process(const QByteArray &asmText)
         }
 
         if (line.endsWith(QLatin1Char(':'))) {
-            currentLabel = line;
-            asmLines++;
-            linesWithLoc.append(line);
+            currentLabel = line.toString();
             output += line + '\n';
             continue;
         }
@@ -152,45 +154,13 @@ QString AsmParser::process(const QByteArray &asmText)
         if (len > maxOpcodeLen)
             maxOpcodeLen = len;
 
-        asmLines++;
-        linesWithLoc.append(line);
-        line.append('\n');
-
-        output += line;
+        output += line + '\n';
     }
+    //We are done, lets clean up
 
-    //Collect corresponding source line numbers
-    struct Data {
-        int sourceLine;
-        QVector<int> asmLines;
-    };
-    QVector<Data> data;
-    for (int i = 0; i < linesWithLoc.size(); ++i) {
-        if (linesWithLoc.at(i).startsWith(".loc")) {
-            int sourceLineNum = getLineNumber(linesWithLoc.at(i));
-            Data d;
-            d.sourceLine = sourceLineNum;
-            for (int j = i + 1; j <linesWithLoc.size(); j++) {
-                if (linesWithLoc.at(j).startsWith(".loc")) {
-                    break;
-                }
-                d.asmLines.append(j);
-            }
-            data.append(d);
-        }
-    }
-
-    for (int i = 0; i < data.size(); ++i) {
-        qDebug () << "For source line: " << data.at(i).sourceLine;
-        qDebug () << "Asm lines are: " << data.at(i).asmLines;
-        qDebug () << "--------------------";
-    }
-
-    QTextStream finalOut(output.toUtf8());
+    QStringList cleanedLines = output.split('\n');
     output.clear();
-    while(!finalOut.atEnd()) {
-        QString line = finalOut.readLine();
-
+    for (QString& line : cleanedLines) {
         //no indentation if it is a label
         int colonPos = line.lastIndexOf(':');
         if (colonPos > -1) {
@@ -223,30 +193,17 @@ QString AsmParser::process(const QByteArray &asmText)
             line.replace(QLatin1Char('\t'), QStringLiteral("\t\t"));
         } else if (maxOpcodeLen > 4 && maxOpcodeLen < 8 && !isOpcodeLen4orMore(line)) {
             line.replace(QLatin1Char('\t'), QStringLiteral("\t\t"));
-        } else if (maxOpcodeLen > 7 && opcodeLen(line) <= 4) {
+        } else if (maxOpcodeLen > 7 && opcodeLen(line.midRef(0)) <= 4) {
             line.replace(QLatin1Char('\t'), QStringLiteral("\t\t\t"));
-        } else if (maxOpcodeLen > 7 && opcodeLen(line) <= 7) {
+        } else if (maxOpcodeLen > 7 && opcodeLen(line.midRef(0)) <= 7) {
             line.replace(QLatin1Char('\t'), QStringLiteral("\t\t"));
         }
 
         //remove @PLT
         line.replace(QStringLiteral("@PLT"), QLatin1String(""));
-
-        line.prepend('\t').append('\n');
-        output.append(line);
+        line.prepend('\t');
     }
-
-    qDebug () << "Total lines: " << asmLines;
-
-    qDebug () << "\nDone";
-
-    QVector<int> lines;
-    QTextStream l{asmText};
-    while(!l.atEnd()) {
-        QString line = l.readLine();
-        if (line.trimmed().startsWith(".loc"))
-            qDebug () << line;
-    }
+    output = cleanedLines.join('\n');
 
     return output;
 }

@@ -1,12 +1,12 @@
 #ifndef ASMPARSER_H
 #define ASMPARSER_H
 
-#include <QByteArray>
+class QString;
 
 namespace AsmParser
 {
-    QString process(const QByteArray& asmText);
+    QString process(const QString& asmText);
     QString demangle(QString&& asmText);
-};
+}
 
 #endif // ASMPARSER_H
