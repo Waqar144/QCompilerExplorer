@@ -19,6 +19,11 @@ static int opcodeLen(const QString& line)
     return tabPos;
 }
 
+static int getLineNumber(const QString& line)
+{
+    return line.splitRef(' ').at(2).toInt();
+}
+
 QString AsmParser::process(const QByteArray &asmText)
 {
     QString output;
@@ -62,7 +67,9 @@ QString AsmParser::process(const QByteArray &asmText)
     s.seek(0);
 
     //2
+    int lineCount = 0;
     while(!s.atEnd()) {
+        ++lineCount;
         QString line = s.readLine();
         if (hasOpcodeRe.match(line).hasMatch()) {
             QHashIterator<QString, bool> i(labels);
@@ -88,9 +95,11 @@ QString AsmParser::process(const QByteArray &asmText)
 
     int maxOpcodeLen = 4;
 
+    QVector<QString> linesWithLoc;
+    linesWithLoc.reserve(lineCount);
     QString currentLabel;
-
     //3
+    int asmLines = 0;
     while(!s.atEnd()) {
         QString line = s.readLine().trimmed();
 
@@ -106,11 +115,18 @@ QString AsmParser::process(const QByteArray &asmText)
         }
 
         if (directiveRe.match(line).hasMatch()) {
+            if (line.startsWith(".loc ")) {
+                output += "\nSource Line: " + QString::number(getLineNumber(line)) + "\n";
+                linesWithLoc.append(line);
+            }
             //if we are in a label
             if (!currentLabel.isEmpty()) {
                 for (const auto& allowed : allowedDirectives) {
-                    if (line.trimmed().startsWith(allowed))
+                    if (line.trimmed().startsWith(allowed)) {
+                        asmLines++;
+                        linesWithLoc.append(line);
                         output += line + "\n";
+                    }
                 }
             }
             continue;
@@ -126,6 +142,8 @@ QString AsmParser::process(const QByteArray &asmText)
 
         if (line.endsWith(QLatin1Char(':'))) {
             currentLabel = line;
+            asmLines++;
+            linesWithLoc.append(line);
             output += line + '\n';
             continue;
         }
@@ -134,9 +152,38 @@ QString AsmParser::process(const QByteArray &asmText)
         if (len > maxOpcodeLen)
             maxOpcodeLen = len;
 
+        asmLines++;
+        linesWithLoc.append(line);
         line.append('\n');
 
         output += line;
+    }
+
+    //Collect corresponding source line numbers
+    struct Data {
+        int sourceLine;
+        QVector<int> asmLines;
+    };
+    QVector<Data> data;
+    for (int i = 0; i < linesWithLoc.size(); ++i) {
+        if (linesWithLoc.at(i).startsWith(".loc")) {
+            int sourceLineNum = getLineNumber(linesWithLoc.at(i));
+            Data d;
+            d.sourceLine = sourceLineNum;
+            for (int j = i + 1; j <linesWithLoc.size(); j++) {
+                if (linesWithLoc.at(j).startsWith(".loc")) {
+                    break;
+                }
+                d.asmLines.append(j);
+            }
+            data.append(d);
+        }
+    }
+
+    for (int i = 0; i < data.size(); ++i) {
+        qDebug () << "For source line: " << data.at(i).sourceLine;
+        qDebug () << "Asm lines are: " << data.at(i).asmLines;
+        qDebug () << "--------------------";
     }
 
     QTextStream finalOut(output.toUtf8());
@@ -187,6 +234,18 @@ QString AsmParser::process(const QByteArray &asmText)
 
         line.prepend('\t').append('\n');
         output.append(line);
+    }
+
+    qDebug () << "Total lines: " << asmLines;
+
+    qDebug () << "\nDone";
+
+    QVector<int> lines;
+    QTextStream l{asmText};
+    while(!l.atEnd()) {
+        QString line = l.readLine();
+        if (line.trimmed().startsWith(".loc"))
+            qDebug () << line;
     }
 
     return output;

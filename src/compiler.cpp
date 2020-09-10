@@ -19,6 +19,7 @@ static QStringList getArgs(QStringList args)
 {
     QStringList argsList{std::move(args)};
     argsList.append({"-S",                              //output assembly
+                     "-g",
                      "-fno-asynchronous-unwind-tables", //omit cfi directives
                      "-fno-dwarf2-cfi-asm",
                     "-fno-stack-protector"});
