@@ -3,9 +3,15 @@
 #include <QTextStream>
 #include <QDebug>
 #include <QRegularExpression>
-#include <array>
 
 #include <cxxabi.h>
+
+namespace {
+QRegularExpression directiveRe { QStringLiteral("^\\s*\\..*$") };
+QRegularExpression labelRe { QStringLiteral("^\\.*[a-zA-Z0-9]+[_]*[0-9]+:$") };
+QRegularExpression hasOpcodeRe { QStringLiteral("^\\s*[a-zA-Z]") };
+QRegularExpression numericLabelsRe { QStringLiteral("\\s*[0-9]:") };
+}
 
 using LabelsHashmap = QHash<QStringRef, bool>;
 
@@ -56,57 +62,10 @@ static void markLabelsUsed(const QVector<QStringRef>& lines, LabelsHashmap& allL
     }
 }
 
-/**
- * @brief merges the following:
- * Source Line: 4
- * Source Line: 5
- * into:
- * Source Line: 4 - 5
- * @param cleanedLines
- */
-static void mergeAnnotatedLineNums(QStringList& lines)
+QVector<QString> AsmParser::removeUnusedLabels(const QVector<QStringRef>& allLines,
+                                      QHash<QStringRef, bool>& labels)
 {
-    for (int i = 0; i < lines.size(); ++i) {
-        if (lines.at(i).startsWith("\tSource Line: ")) {
-            QString cur = lines.at(i);
-            qDebug() << lines.at(i);
-            int j;
-            for (j = i + 1; j < lines.size(); ++j) {
-                if (lines.at(j) != '\t' && !lines.at(j).startsWith("\tSource Line: "))
-                    break;
-            }
-            if (j > 0) --j;
-            if (j != i && lines.at(j).startsWith("\tSource Line: ")) {
-                int numPos = lines.at(j).lastIndexOf(' ') + 1;
-                if (numPos == - 1)
-                    continue;
-                int num = lines.at(j).midRef(numPos, lines.at(j).size()).toInt();
-                lines[i].append(" - " + QString::number(num));
-            }
-            //collapse all the lines from i -> j
-            for (int k = i + 1; k < j + 1; ++k)
-                lines[k] = "";
-        }
-    }
-    lines.removeAll("");
-}
-
-QString AsmParser::process(const QString &asmText)
-{
-    QString output;
-    output.reserve(asmText.length());
-
-    //1. collect all the labels
-    //2. go through the asm line by line and check if the labels are used/unused
-    //3. if the labels are unused, they get deleted
-    //4. every line beginning with '.' gets deleted, unless it is in a label
-
-    QRegularExpression directiveRe { QStringLiteral("^\\s*\\..*$") };
-    QRegularExpression labelRe { QStringLiteral("^\\.*[a-zA-Z0-9]+[_]*[0-9]+:$") };
-    QRegularExpression hasOpcodeRe { QStringLiteral("^\\s*[a-zA-Z]") };
-    QRegularExpression numericLabelsRe { QStringLiteral("\\s*[0-9]:") };
-
-    const std::array<QString, 7> allowedDirectives =
+    static QString allowedDirectives[7] =
     {
         QStringLiteral(".string"),
         QStringLiteral(".ascii"),
@@ -117,30 +76,8 @@ QString AsmParser::process(const QString &asmText)
         QStringLiteral(".quad")
     };
 
-    const QVector<QStringRef> allLinesTemp = asmText.splitRef('\n');
-    //trim all Lines
-    QVector<QStringRef> allLines(allLinesTemp.size());
-    for (int i = 0; i < allLinesTemp.size(); ++i){
-        allLines[i] = allLinesTemp.at(i).trimmed();
-    }
-
-    //1
-    //<label, used>
-    QHash<QStringRef, bool> labels = collectAllLabels(allLines);
-
-    //2
-    markLabelsUsed(allLines, labels);
-
-    //remove unused labels from labels hash-map
-    auto it = labels.begin();
-    while (it != labels.end()) {
-        if (it.value() == false)
-            labels.erase(it++);
-        else
-            ++it;
-    }
-
-    int maxOpcodeLen = 4;
+    QVector<QString> out;
+    out.reserve(allLines.size());
 
     QString currentLabel;
     int prevLineNum = -1;
@@ -152,7 +89,7 @@ QString AsmParser::process(const QString &asmText)
             currentLabel = "";
             if (labels.contains(l)) {
                 currentLabel = line.toString();
-                output += line + "\n";
+                out.append(line.toString());
             }
             continue;
         }
@@ -161,7 +98,7 @@ QString AsmParser::process(const QString &asmText)
             if (line.trimmed().startsWith(".loc ")) {
                 int lineNum = getLineNumber(line);
                 if (prevLineNum != lineNum) {
-                    output += "\nSource Line: " + QString::number(lineNum) + "\n";
+                    out.append("\nSource Line: " + QString::number(lineNum));
                     prevLineNum = lineNum;
                 }
             }
@@ -169,7 +106,7 @@ QString AsmParser::process(const QString &asmText)
             if (!currentLabel.isEmpty()) {
                 for (const auto& allowed : allowedDirectives) {
                     if (line.trimmed().startsWith(allowed)) {
-                        output += line + "\n";
+                        out.append(line.toString());
                     }
                 }
             }
@@ -186,7 +123,7 @@ QString AsmParser::process(const QString &asmText)
 
         if (line.endsWith(QLatin1Char(':'))) {
             currentLabel = line.toString();
-            output += line + '\n';
+            out.append(line.toString());
             continue;
         }
 
@@ -194,19 +131,87 @@ QString AsmParser::process(const QString &asmText)
         if (len > maxOpcodeLen)
             maxOpcodeLen = len;
 
-        output += line + '\n';
+        out.append(line.toString());
     }
-    //We are done, lets clean up
+    return out;
+}
 
-    QStringList cleanedLines = output.split('\n');
-    output.clear();
+
+/**
+ * @brief merges the following:
+ * Source Line: 4
+ * Source Line: 5
+ * into:
+ * Source Line: 4 - 5
+ * @param cleanedLines
+ */
+static void mergeAnnotatedLineNums(QVector<QString>& lines)
+{
+    for (int i = 0; i < lines.size(); ++i) {
+        if (lines.at(i).startsWith("\t\nSource Line: ")) {
+            QString cur = lines.at(i);
+            int j;
+            for (j = i + 1; j < lines.size(); ++j) {
+                if (lines.at(j) != '\t' && !lines.at(j).startsWith("\t\nSource Line: "))
+                    break;
+            }
+            if (j > 0) --j;
+            if (j != i && lines.at(j).startsWith("\t\nSource Line: ")) {
+                int numPos = lines.at(j).lastIndexOf(' ') + 1;
+                if (numPos == - 1)
+                    continue;
+                int num = lines.at(j).midRef(numPos, lines.at(j).size()).toInt();
+                lines[i].append(" - " + QString::number(num));
+            }
+            //collapse all the lines from i -> j
+            for (int k = i + 1; k < j + 1; ++k)
+                lines[k] = "";
+        }
+    }
+    lines.removeAll("");
+}
+
+QString AsmParser::process(const QString &asmText)
+{
+    //1. collect all the labels
+    //2. go through the asm line by line and check if the labels are used/unused
+    //3. if the labels are unused, they get deleted
+    //4. every line beginning with '.' gets deleted, unless it is in a label
+
+    const QVector<QStringRef> allLinesTemp = asmText.splitRef('\n');
+    //trim all Lines
+    QVector<QStringRef> allLines(allLinesTemp.size());
+    for (int i = 0; i < allLinesTemp.size(); ++i){
+        allLines[i] = allLinesTemp.at(i).trimmed();
+    }
+
+    //1 collect all the labels
+    //<label, used>
+    LabelsHashmap labels = collectAllLabels(allLines);
+
+    //2 go through the asm line by line and check if the labels are used/unused
+    markLabelsUsed(allLines, labels);
+
+    //remove unused labels from labels hash-map
+    auto it = labels.begin();
+    while (it != labels.end()) {
+        if (it.value() == false)
+            labels.erase(it++);
+        else
+            ++it;
+    }
+
+    //3 if the labels are unused, they get deleted
+    //4. every line beginning with '.' gets deleted, unless it is in a label
+    auto cleanedLines = removeUnusedLabels(allLines, labels);
+
+    //We are done, lets clean up / fix indentation
     for (QString& line : cleanedLines) {
         //no indentation if it is a label
         int colonPos = line.lastIndexOf(':');
         if (colonPos > -1) {
             //we are at the end of the line, it is a label
             if (colonPos >= line.length() - 1) {
-                output.append(line).append('\n');
                 continue;
             }
 
@@ -224,7 +229,6 @@ QString AsmParser::process(const QString &asmText)
             //it is a label, but has a comment
             //this *may* result in a bug someday if there is a string with a ": #" pattern
             if (!isLabel && line.at(i) == '#') {
-                output.append(line).append('\n');
                 continue;
             }
         }
@@ -243,11 +247,16 @@ QString AsmParser::process(const QString &asmText)
         line.replace(QStringLiteral("@PLT"), QLatin1String(""));
         line.prepend('\t');
     }
+
     mergeAnnotatedLineNums(cleanedLines);
-    output = cleanedLines.join('\n');
 
-
-
+    QString output;
+    output.reserve(cleanedLines.size() * cleanedLines.at(0).size());
+    for (auto&& line : cleanedLines)
+    {
+        line += '\n';
+        output.append(std::move(line));
+    }
     return output;
 }
 

@@ -222,7 +222,7 @@ void MainWindow::on_compileButtonPress()
 
     if (out.second) {
         QString demangled = AsmParser::demangle(std::move(out.first));
-        const QString cleanAsm = AsmParser::process(demangled);
+        const QString cleanAsm = AsmParser().process(demangled);
         ui->asmTextEdit->setPlainText(cleanAsm);
     } else {
         ui->asmTextEdit->setPlainText(QStringLiteral("<Compilation Failed>\n") + out.first);

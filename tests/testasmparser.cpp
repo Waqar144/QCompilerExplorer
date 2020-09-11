@@ -11,7 +11,7 @@ void TestAsmParser::test1()
     if (!f.open(QIODevice::ReadOnly))
         QFAIL("Failed to open file test1.s");
     auto before = f.readAll().trimmed();
-    auto asmSrc = AsmParser::process(before).toUtf8().trimmed();
+    auto asmSrc = AsmParser().process(before).toUtf8().trimmed();
 
     QTextStream s{asmSrc};
     QTextStream d{before};

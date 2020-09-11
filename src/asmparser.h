@@ -2,11 +2,24 @@
 #define ASMPARSER_H
 
 class QString;
+class QStringRef;
 
-namespace AsmParser
+template <typename T>
+class QVector;
+
+template <typename K, typename V>
+class QHash;
+
+class AsmParser
 {
+public:
     QString process(const QString& asmText);
-    QString demangle(QString&& asmText);
-}
+    static QString demangle(QString&& asmText);
+
+private:
+    QVector<QString> removeUnusedLabels(const QVector<QStringRef> &allLines, QHash<QStringRef, bool> &labels);
+
+    int maxOpcodeLen = 4;
+};
 
 #endif // ASMPARSER_H
