@@ -26,7 +26,6 @@ SOURCES += \
     main.cpp \
     asmparser.cpp \
     compiler.cpp \
-    compilerservice.cpp \
     settingsdialog.cpp \
     asmtextedit.cpp \
     mainwindow.cpp \
@@ -43,7 +42,6 @@ HEADERS += \
     asmparser.h \
     ce_endpoints.h \
     compiler.h \
-    compilerservice.h \
     settingsdialog.h \
     asmtextedit.h \
     mainwindow.h \
