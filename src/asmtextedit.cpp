@@ -1,7 +1,5 @@
 #include "asmtextedit.h"
 
-#include "compilerservice.h"
-
 #include <QDebug>
 #include <QJsonObject>
 #include <QNetworkReply>
@@ -31,22 +29,11 @@ AsmTextEdit::AsmTextEdit(QWidget* parent)
 
 void AsmTextEdit::mouseMoveEvent(QMouseEvent* event)
 {
-    QTextCursor tc = cursorForPosition(event->pos());
-    tc.select(QTextCursor::WordUnderCursor);
-    const QString strWord = tc.selectedText();
-    if (strWord.isEmpty()) return;
+//    QTextCursor tc = cursorForPosition(event->pos());
+//    tc.select(QTextCursor::WordUnderCursor);
+//    const QString strWord = tc.selectedText();
+//    if (strWord.isEmpty()) return;
 
-    QNetworkReply* reply = CompilerExplorerSvc::instance()->tooltipRequest(strWord);
-    connect(reply, &QNetworkReply::readyRead, this, [=]() {
-        QJsonObject doc = QJsonDocument::fromJson(reply->readAll()).object();
-        auto resultObj = doc.value(QStringLiteral("result")).toObject();
-        auto value = resultObj.value(QStringLiteral("tooltip")).toString();
-
-        const QString currentWord = getCurrentWordUnderCursor();
-
-        if (currentWord == strWord)
-            QToolTip::showText(QCursor::pos(), value, this);
-    });
     return QCodeEditor::mouseMoveEvent(event);
 }
 

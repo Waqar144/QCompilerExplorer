@@ -57,13 +57,6 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="localCheckbox">
-            <property name="text">
-             <string>Local</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="compileButton">
             <property name="text">
              <string>Compile</string>
@@ -78,28 +71,6 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_5">
-      <item>
-       <widget class="FileListWidget" name="fileListWidget">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>200</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
-      </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
@@ -133,19 +104,11 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpen_Folder"/>
     <addaction name="actionSave_asm_to_file"/>
     <addaction name="actionSave_code_to_file"/>
    </widget>
-   <widget class="QMenu" name="menuView">
-    <property name="title">
-     <string>View</string>
-    </property>
-    <addaction name="actionFileBrowser"/>
-   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
-   <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionSettings">
@@ -195,11 +158,6 @@
    <class>ArgsLineEdit</class>
    <extends>QLineEdit</extends>
    <header location="global">widgets/argslineedit.h</header>
-  </customwidget>
-  <customwidget>
-   <class>FileListWidget</class>
-   <extends>QListWidget</extends>
-   <header location="global">widgets/filelistwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

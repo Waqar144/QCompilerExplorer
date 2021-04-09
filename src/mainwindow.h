@@ -19,21 +19,12 @@ public:
     ~MainWindow();
 
 private slots:
-    void setupLanguages(const QByteArray& data);
-    void updateCompilerComboBox(const QByteArray& data);
     void updateAsmTextEdit(const QByteArray& data);
 
     void on_languagesComboBox_currentIndexChanged(const QString& arg1);
-    void on_compileButton_clicked();
     void openSettingsDialog();
-    void on_compilerComboBox_currentIndexChanged(const QString& arg1);
     void on_compileButtonPress();
-    void on_localCheckbox_stateChanged(int arg1);
     void saveToFile();
-    void onselectedFileChanged(const QString &filePath);
-    void onActionOpenFoldertriggered();
-
-    void on_actionFileBrowser_triggered(bool checked);
 
 private:
     void initConnections();
